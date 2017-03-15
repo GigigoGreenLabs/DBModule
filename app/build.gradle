@@ -28,19 +28,19 @@ android {
 }
 
 dependencies {
-  compile fileTree(dir: 'libs', include: ['*.jar'])
+ // compile fileTree(dir: 'libs', include: ['*.jar'])
   testCompile 'junit:junit:4.12'
   compile 'com.android.support:appcompat-v7:25.2.0'
   compile 'com.android.support:design:25.2.0'
 
   compile project(':dbmaster')
-  //by jar compile project(path: ':dbprocessor')
+  compile project(path: ':dbprocessor')
   compile project(':dbjsonimpl')
 }
 import org.gradle.internal.os.OperatingSystem;
 
 //asv creo q esta vaina no es necesaria más q para debug ya q sirve para q use la ultima version del annotation procesor
-/*annotation processor*/
+/*annotation processor
 task processorTask(type: Exec) {
 
   //todo this fail in windows/test for mac
@@ -53,7 +53,7 @@ task processorTask(type: Exec) {
   }
 }
 processorTask.dependsOn(':dbprocessor:build')
-preBuild.dependsOn(processorTask)
+preBuild.dependsOn(processorTask)*/
 /*
 * 1.-:processor:build will generate the jar file with our annotation and its processor
 * 2.-processorTask will copy this jar file to the android app/libs/ folder
