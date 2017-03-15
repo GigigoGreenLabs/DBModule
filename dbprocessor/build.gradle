@@ -12,3 +12,5 @@ task sourcesJar(type: Jar) {
 artifacts {
     archives jar
 }
+
+sourcesJar.dependsOn(':build')
