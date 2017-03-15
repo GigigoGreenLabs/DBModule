@@ -15,16 +15,23 @@ import java.util.Objects;
 /**
  * Created by nubor on 06/03/2017.
  */
-@DataTable(alias = "Usuarios") public class UsersModel extends DBTableMaster {
-  @DataField String Name;
-  @DataField String Surname;
+//@DataTable(alias = "Usuarios",isOnlyOneRecord = false)
+public class UsersModel extends DBTableMaster {
+   String Name;
+   String Surname;
+   String id;
 
+
+  //@DataField String Name;
+  //@DataField String Surname;
+  //@DataField String id;
   public UsersModel() {
   }
 
-  public UsersModel(String name, String surname) {
+  public UsersModel(String name, String surname, String id) {
     this.Name = name;
     this.Surname = surname;
+    this.id = id;
   }
 
   public String getName() {
@@ -43,16 +50,25 @@ import java.util.Objects;
     Surname = surname;
   }
 
-  /*apt generated, una linea de megaHash por field */
+  public String getId() {
+    return id;
+  }
+
+  public void setId(String id) {
+    this.id = id;
+  }
+
+  /*apt generated, una linea de megaHash por field , you can generate by android Studio*/
   @Override public int hashCode() {
     if (BuildConfig.VERSION_CODE < 19) {
       int megaHash = 0;
       megaHash = megaHash + hashCodeObject(this.getName());
       megaHash = megaHash + hashCodeObject(this.getSurname());
+      megaHash = megaHash + hashCodeObject(this.getId());
       return megaHash;
     } else {
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-        return Objects.hash(Name, Surname);
+        return Objects.hash(Name, Surname, id);
       }
     }
     return -1;

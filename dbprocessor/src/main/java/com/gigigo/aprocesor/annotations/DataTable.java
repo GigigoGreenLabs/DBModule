@@ -5,4 +5,5 @@ package com.gigigo.aprocesor.annotations;
  */
 public @interface DataTable {
   String alias();
+  boolean isOnlyOneRecord();//asv es para si queremos q ese wrapper solo sea un recurso
 }

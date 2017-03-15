@@ -39,7 +39,7 @@ dependencies {
 }
 import org.gradle.internal.os.OperatingSystem;
 
-
+//asv creo q esta vaina no es necesaria más q para debug ya q sirve para q use la ultima version del annotation procesor
 /*annotation processor*/
 task processorTask(type: Exec) {
 

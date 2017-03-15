@@ -1,8 +1,16 @@
 package com.gigigo.aprocesor;
 
+import com.gigigo.aprocesor.annotations.DataBase;
+import com.gigigo.aprocesor.annotations.DataField;
 import com.gigigo.aprocesor.annotations.DataTable;
 import java.io.IOException;
 import java.io.Writer;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
@@ -20,9 +28,121 @@ import javax.tools.JavaFileObject;
     extends AbstractProcessor {
   @Override
   public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-
+    String packageGenerated = "package com.gigigo.dbmodule.generated;";
+    //asv de momento sólo nos importan los @DataTable, los @DataBase de momento no estarán ni presentes
+    //y los @Datafield tomaran sentido una vez que utilizemos un SQLite, un Realm, un Ormlite...
     StringBuilder builder = new StringBuilder();
 
+    StringBuilder builderDataBaseMaster = new StringBuilder();
+
+    builderDataBaseMaster.append(packageGenerated + "\n\n");
+
+    for (Element element : roundEnv.getElementsAnnotatedWith(DataTable.class)) {
+      builderDataBaseMaster.append("import " + element.asType().toString() + ";\n\n");
+    }
+
+    builderDataBaseMaster.append("import db.gigigo.com.dbmaster.masterclass.DBEngineMaster;\n\n")
+        .append("import db.gigigo.com.dbmaster.masterclass.DBMaster;\n\n")
+        .append("import java.util.ArrayList;\n\n")
+        .append("import db.gigigo.com.dbmaster.schema.DBScheme;\n\n")
+        .append("import db.gigigo.com.dbmaster.schema.DBSchemeItem;\n\n")
+        .append("import db.gigigo.com.dbmaster.schema.DBTableFieldScheme;\n\n")
+        .append("import db.gigigo.com.dbmaster.schema.DBTableScheme;\n\n");
+
+    builderDataBaseMaster.append("public class MyDB extends DBMaster {\n\n");
+
+
+    /*calculo de los hascode de los schemas  de las tablas*/
+    final Set<? extends Element> dataFields = roundEnv.getElementsAnnotatedWith(DataField.class);
+    final Map<Element, List<Element>> dataTables = new HashMap<>();
+    final List<Element> lstTables4Hascode = new ArrayList<>();
+
+    for (final Element element : dataFields) {
+      final Element classElement = element.getEnclosingElement();
+      if (classElement.getAnnotation(DataTable.class) != null) {
+        if (!lstTables4Hascode.contains(classElement)) lstTables4Hascode.add(classElement);
+        List<Element> list = dataTables.get(classElement);
+        if (list == null) {
+          list = new ArrayList<>();
+          dataTables.put(classElement, list);
+        }
+        list.add(element);
+      }
+    }
+
+    for (Element ele : lstTables4Hascode) {
+      List<Element> list = dataTables.get(ele);
+      int megaHash = 0;
+      for (Element fieldElement : list) {
+        megaHash = megaHash + hashCodeObject(fieldElement.asType().toString());
+        megaHash = megaHash + hashCodeObject(fieldElement.getSimpleName().toString());
+      }
+
+      DataTable dataTableAnnotation = ele.getAnnotation(DataTable.class);
+      String aliasTable = dataTableAnnotation.alias();
+
+      builderDataBaseMaster.append(
+          "public static final String " + aliasTable + "FieldsHashCode = \"" + megaHash + "\" ;\n");
+    }
+
+    builderDataBaseMaster.append("public MyDB(DBEngineMaster mDBEngine) {\n"
+        + "        super(mDBEngine);\n"
+        + "        DBScheme dbScheme = new DBScheme();\n"
+        + "    dbScheme.setDbName(this.toString());\n "
+        + "     ArrayList<DBSchemeItem> lstDBSchemeItem = new ArrayList<>();\n"
+        + "    if (!mDBEngine.isDBCreated(dbScheme)) {\n"
+        + "      mDBEngine.createDB(dbScheme);\n"
+        + "    }\n else{\n"
+        + "       dbScheme=mDBEngine.loadDBScheme();\n"
+        + "       lstDBSchemeItem.addAll(dbScheme.getLstSchemaItems());}\n"
+        + "       ");
+
+    for (Element ele : lstTables4Hascode) {
+      DataTable dataTableAnnotation = ele.getAnnotation(DataTable.class);
+      String aliasTable = dataTableAnnotation.alias();
+      builderDataBaseMaster.append("\nlstDBSchemeItem.add(\n"
+          + " new DBSchemeItem(\""
+          + aliasTable
+          + "\" , "
+          + ele
+          + ".class.getSimpleName(), "
+          + aliasTable
+          + "FieldsHashCode,System.currentTimeMillis()));");
+    }
+    builderDataBaseMaster.append("\n dbScheme.setLstSchemaItems(lstDBSchemeItem);"
+        + "\nmDBEngine.createDBScheme(dbScheme);");
+
+    for (Element ele : lstTables4Hascode) {
+      DataTable dataTableAnnotation = ele.getAnnotation(DataTable.class);
+      String aliasTable = dataTableAnnotation.alias();
+      builderDataBaseMaster.append("\nif (!mDBEngine.isDBTableCreated(\""
+          + aliasTable
+          + "\")) {\n"
+          + "      ArrayList<DBTableFieldScheme> lstFields_"
+          + aliasTable
+          + " = new ArrayList<>(); ");
+
+      List<Element> list = dataTables.get(ele);
+
+      for (Element fieldElement : list) {
+        builderDataBaseMaster.append(
+            "\n lstFields_" + aliasTable + ".add(new DBTableFieldScheme(\"" + fieldElement.asType()
+                .toString() + "\", \"" + fieldElement.getSimpleName().toString() + "\"));");
+      }
+      builderDataBaseMaster.append("\nDBTableScheme table"
+          + aliasTable
+          + " = new DBTableScheme(\""
+          + aliasTable
+          + "\", lstFields_"
+          + aliasTable
+          + ");");
+      builderDataBaseMaster.append("\nmDBEngine.createDBTableScheme(table" + aliasTable + ");");
+      builderDataBaseMaster.append("\nmDBEngine.createDBTable(table" + aliasTable + ");\n}");
+    }
+
+    builderDataBaseMaster.append("      }\n\n");
+    String MigrateDBMethodIni = " public void migrateDB(){\n";
+    String MigrateDBMethodBody = "";
 
     //1º datatables
     for (Element element : roundEnv.getElementsAnnotatedWith(DataTable.class)) {
@@ -34,7 +154,7 @@ import javax.tools.JavaFileObject;
 
       builder
           //package
-          .append("package com.gigigo.dbmodule.generated;\n\n")
+          .append(packageGenerated + "\n\n")
           //import
           .append("import com.wagnerandade.coollection.query.Query;\n")
           .append("import db.gigigo.com.dbmaster.masterclass.DBEngineMaster;\n")
@@ -45,7 +165,6 @@ import javax.tools.JavaFileObject;
               + ";\n\n") // import db.gigigo.com.dbmodule.dbsample.UsersModel;
           .append("import java.util.ArrayList;\n")
           .append("import static com.wagnerandade.coollection.Coollection.*;\n")
-
 
           .append("public class "
               + dataTableClassName
@@ -66,7 +185,7 @@ import javax.tools.JavaFileObject;
               + "    if (mItems == null) {\n"
               + "      mItems = (ArrayList<"
               + dataTableClassName
-              + ">) mDBEngine.loadItemsTable(this.mAlias);\n"
+              + ">) load();\n"
               + "    }\n"
               + "    return mItems;\n"
               + "  }\n"
@@ -80,14 +199,18 @@ import javax.tools.JavaFileObject;
               + ">) items);\n"
               + "    }\n"
               + "  }\n"
-              + "\n"
+              + "\n @Override public void clearItems() {\n"
+              + "    mySetItems(new ArrayList<"
+              + dataTableClassName
+              + ">());\n"
+              + "  }\n"
               + "  public void mySetItems(ArrayList<"
               + dataTableClassName
               + "> items) {\n"
               + "    mItems = (ArrayList<"
               + dataTableClassName
               + ">) items;\n"
-              + "    mDBEngine.saveTable(this, this.mAlias);\n"
+              + "    save();\n"
               + "  }\n"
               + "\n"
               + "  @Override public void delItem(int idx) {\n"
@@ -139,42 +262,121 @@ import javax.tools.JavaFileObject;
               + "  }\n"
               + "\n"
               + "  @Override public void addItem(DBTableMaster item) {\n"
-              + "    if (item instanceof "+ dataTableClassName+") {\n"
+              + "    if (item instanceof "
+              + dataTableClassName
+              + ") {\n"
               + "      mItems = getItems();\n"
-              + "      mItems.add(("+ dataTableClassName+") item);\n"
+              + "      mItems.add(("
+              + dataTableClassName
+              + ") item);\n"
               + "      setItems(mItems);\n"
               + "    }\n"
               + "  }\n"
               + "\n"
-              + "  @Override public Query<"+ dataTableClassName+"> FROM() {\n"
-              + "    Query<"+ dataTableClassName+"> from = from(this.mItems);\n"
+              + "  @Override public Query<"
+              + dataTableClassName
+              + "> FROM() {\n"
+              + "    Query<"
+              + dataTableClassName
+              + "> from = from(this.mItems);\n"
               + "    return from;\n"
-              + "  } \n \n\n}");
+              + "  } \n \n\n"
+              + " @Override public String HashCodeTableFields(){ return MyDB."
+              + aliasTable
+              + "FieldsHashCode ;}\n"
+              + "  @Override public String ModelClass() {return \""
+              + dataTableClassName
+              + "\";}"
+              + ""
+              + ""
+              + "}");
+      //todo ver si una vez instanciado el wrapper no ir a buscarlo de nuevo a disco
+      builderDataBaseMaster.append(dataTableClassName
+          + "Wrapper m"
+          + aliasTable
+          + ";\n"
+          + "  public "
+          + dataTableClassName
+          + "Wrapper "
+          + aliasTable
+          + "() {"
+          + "\nif(m"
+          + aliasTable
+          + "==null){"
+          + "\n"
+          + "    ArrayList<"
+          + dataTableClassName
+          + "> listItems = (ArrayList<"
+          + dataTableClassName
+          + ">) mDBEngine.loadItemsTable(\""
+          + aliasTable
+          + "\"+"
+          + aliasTable
+          + "FieldsHashCode);\n"
+          + "    m"
+          + aliasTable
+          + " = new "
+          + dataTableClassName
+          + "Wrapper (new "
+          + dataTableClassName
+          + "(), mDBEngine, \""
+          + aliasTable
+          + "\");\n"
+          + "    m"
+          + aliasTable
+          + ".setItems(listItems);\n}"
+          + "    return  m"
+          + aliasTable
+          + ";\n"
+          + "  }");
+      MigrateDBMethodBody = MigrateDBMethodBody + "this." + aliasTable + "().save();\n";
+      try { // write the file
+        JavaFileObject source = processingEnv.getFiler()
+            .createSourceFile("com.gigigo.dbmodule.generated." + dataTableClassName + "Wrapper");
 
-
-    // for each javax.lang.model.element.Element annotated with the CustomAnnotation
-   /* for (Element element : roundEnv.getElementsAnnotatedWith(DataTable.class)) {
-      String objectType = element.getSimpleName().toString();
-      // this is appending to the return statement
-      builder.append(objectType).append(" says hello!\\n");
+        Writer writer = source.openWriter();
+        writer.write(builder.toString());
+        writer.flush();
+        writer.close();
+      } catch (IOException e) {
+        // Note: calling e.printStackTrace() will print IO errors
+        // that occur from the file already existing after its first run, this is normal
+      }
     }
-    builder.append("\";\n") // end return
-        .append("\t}\n") // close method
-        .append("}\n"); // close class
-*/
+
+    builderDataBaseMaster.append(MigrateDBMethodIni+MigrateDBMethodBody+"}\n\n }");
+    //chamo falta terminar lo del for de myDB, y despues cerrar la clase y por ultimo escribir en el
+    //file, falta tb mejorar la legibilidad des esto, lo primero una funcion de
+    //escribir clase, pasamdo nombre y builder y crear regiones para encapsular las distintas areas
+
     try { // write the file
       JavaFileObject source =
-          processingEnv.getFiler().createSourceFile("com.gigigo.dbmodule.generated."+ dataTableClassName + "Wrapper");
+          processingEnv.getFiler().createSourceFile("com.gigigo.dbmodule.generated.MyDB");
 
       Writer writer = source.openWriter();
-      writer.write(builder.toString());
+      writer.write(builderDataBaseMaster.toString());
       writer.flush();
       writer.close();
     } catch (IOException e) {
       // Note: calling e.printStackTrace() will print IO errors
       // that occur from the file already existing after its first run, this is normal
     }
-    }
+
     return true;
+  }
+
+  //@Override public int hashCode(Object obj) {
+  //
+  //
+  //  for (final Field field : clazz.getDeclaredFields()) {
+  //  int megaHash = 0;
+  //  megaHash = megaHash + hashCodeObject(this.getName());
+  //  megaHash = megaHash + hashCodeObject(this.getSurname());
+  //  megaHash = megaHash + hashCodeObject(this.getId());
+  //  return megaHash;
+  //}
+
+  public static int hashCodeObject(Object o) {
+    return (o == null) ? 0 : o.hashCode();
   }
 }

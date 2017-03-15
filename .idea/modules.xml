@@ -4,9 +4,10 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/DBModule.iml" filepath="$PROJECT_DIR$/DBModule.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/dbjsonimpl/dbserializableimpl.iml" filepath="$PROJECT_DIR$/dbjsonimpl/dbserializableimpl.iml" />
+      <module fileurl="file://$PROJECT_DIR$/dbjsonimpl/dbjsonimpl.iml" filepath="$PROJECT_DIR$/dbjsonimpl/dbjsonimpl.iml" />
       <module fileurl="file://$PROJECT_DIR$/dbmaster/dbmaster.iml" filepath="$PROJECT_DIR$/dbmaster/dbmaster.iml" />
       <module fileurl="file://$PROJECT_DIR$/dbprocessor/dbprocessor.iml" filepath="$PROJECT_DIR$/dbprocessor/dbprocessor.iml" />
+      <module fileurl="file://$PROJECT_DIR$/dbjsonimpl/dbserializableimpl.iml" filepath="$PROJECT_DIR$/dbjsonimpl/dbserializableimpl.iml" />
     </modules>
   </component>
 </project>

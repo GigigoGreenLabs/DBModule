@@ -5,15 +5,16 @@ import com.gigigo.aprocesor.annotations.DataField;
 import com.gigigo.aprocesor.annotations.DataTable;
 import db.gigigo.com.dbmaster.BuildConfig;
 import db.gigigo.com.dbmaster.masterclass.DBTableMaster;
+
 import java.util.Objects;
 
 /**
  * Created by nubor on 07/03/2017.
  */
-@DataTable(alias = "Testeo")
+@DataTable(alias = "Testeo",isOnlyOneRecord = false)
 public class NewTestModel   extends DBTableMaster {
   @DataField String Title;
-  @DataField String Name;
+  @DataField String Nombre;
   @DataField String Age;
 
   public String getTitle() {
@@ -25,11 +26,11 @@ public class NewTestModel   extends DBTableMaster {
   }
 
   public String getName() {
-    return Name;
+    return Nombre;
   }
 
   public void setName(String name) {
-    Name = name;
+    Nombre = name;
   }
 
   public String getAge() {
@@ -49,7 +50,7 @@ public class NewTestModel   extends DBTableMaster {
       return megaHash;
     } else {
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-        return Objects.hash(Name,Title,Age);
+        return Objects.hash(Nombre,Title,Age);
       }
     }
     return -1;

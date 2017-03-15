@@ -1,29 +1,28 @@
 package db.gigigo.com.dbmodule;
 
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.View;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.widget.Button;
-import android.widget.Toast;
+import com.gigigo.dbmodule.generated.MyDB;
 import db.gigigo.com.dbmaster.masterclass.DBEngineMaster;
+import db.gigigo.com.dbmaster.masterclass.DBMapperMaster;
 import db.gigigo.com.dbmaster.masterclass.DBSaveLoadCallback;
+import db.gigigo.com.dbmaster.masterclass.DBTableMaster;
 import db.gigigo.com.dbmodule.dbsample.DataGenerator;
-import db.gigigo.com.dbmodule.dbsample.MyDB;
 import db.gigigo.com.dbmodule.dbsample.NewTestModel;
 import db.gigigo.com.dbmodule.dbsample.UsersModel;
+
+import db.gigigo.com.dbmodule.dbsample.UsersModelv2;
 import db.gigigo.com.dbserializableimpl.DBEngineJSON;
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.wagnerandade.coollection.Coollection.eq;
-import static com.wagnerandade.coollection.Coollection.from;
 
 public class MainActivity extends AppCompatActivity {
   public static MyDB mMyDataBase;//asv this maybe in the application
-  UsersModel lastUsersModel;
+  UsersModelv2 lastUsersModel;
   NewTestModel lastNewTestModel;
 
   @Override protected void onCreate(Bundle savedInstanceState) {
@@ -35,9 +34,17 @@ public class MainActivity extends AppCompatActivity {
     Button btnAdd = (Button) findViewById(R.id.btnAdd);
     btnAdd.setOnClickListener(new View.OnClickListener() {
       @Override public void onClick(View view) {
-        lastUsersModel =
-            new UsersModel(DataGenerator.getRandomName(), DataGenerator.getRandomSurName());
-        mMyDataBase.Usuarios().addItem(lastUsersModel);
+
+        ArrayList<UsersModelv2> lst25 = new ArrayList<UsersModelv2>();
+        for (int i = 0; i < 2; i++) {
+
+          lastUsersModel =
+              new UsersModelv2(DataGenerator.getRandomName()+"NEW", DataGenerator.getRandomSurName()+"NEW",
+                  System.currentTimeMillis() + "");
+          lst25.add(lastUsersModel);
+        }
+
+        mMyDataBase.Usuarios().setItems(lst25);
       }
     });
 
@@ -52,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
     btnList.setOnClickListener(new View.OnClickListener() {
       @Override public void onClick(View view) {
 
-        for (UsersModel item : mMyDataBase.Usuarios().getItems()) {
+        for (UsersModelv2 item : mMyDataBase.Usuarios().getItems()) {
           System.out.println("Name: "
               + item.getName()
               + " SurName: "
@@ -68,13 +75,10 @@ public class MainActivity extends AppCompatActivity {
     btnQuery.setOnClickListener(new View.OnClickListener() {
       @Override public void onClick(View view) {
 
-        List<UsersModel> all = mMyDataBase.Usuarios()
-            .FROM()
-            .where("getName", eq("Pepito"))
-            .orderBy("getSurname")
-            .all();
+        List<UsersModelv2> all =
+            mMyDataBase.Usuarios().FROM().where("Name", eq("Pepito")).orderBy("Surname").all();
 
-        for (UsersModel item : all) {
+        for (UsersModelv2 item : all) {
           System.out.println("Name: "
               + item.getName()
               + " SurName: "
@@ -89,18 +93,18 @@ public class MainActivity extends AppCompatActivity {
     btnUpdate.setOnClickListener(new View.OnClickListener() {
       @Override public void onClick(View view) {
 
-        List<UsersModel> all = mMyDataBase.Usuarios()
+        List<UsersModelv2> all = mMyDataBase.Usuarios()
             .FROM()
             .where("getName", eq("Pepito"))
             .orderBy("getSurname")
             .all();
         if (all.size() > 0) {
-          UsersModel user4Set = all.get(0);
+          UsersModelv2 user4Set = all.get(0);
           int idxForUpdate = mMyDataBase.Usuarios().findIndex(user4Set);
           user4Set.setName("Papote");
           mMyDataBase.Usuarios().setItem(user4Set, idxForUpdate);
 
-          for (UsersModel item : all) {
+          for (UsersModelv2 item : all) {
             System.out.println("Name: "
                 + item.getName()
                 + " SurName: "
@@ -112,30 +116,48 @@ public class MainActivity extends AppCompatActivity {
         System.out.println("TOTAL pepitos: " + all.size());
       }
     });
+
+    // mMyDataBase.Usuarios().createFrom(mMyDataBase.Usuarios())
   }
+
+  long timeFirst = 0;
 
   private void setCallbackLoadSave() {
     mMyDataBase.Usuarios().setmDBSaveLoadCallback(new DBSaveLoadCallback() {
       @Override public void preSave() {
-        System.out.println("preSave");
+        timeFirst = System.currentTimeMillis();
+        System.out.println("*****************preSave");
       }
 
       @Override public void postSave() {
-        System.out.println("postSave");
+        System.out.println(
+            "*****************postSave time for save" + (System.currentTimeMillis() - timeFirst));
       }
 
       @Override public void preLoad() {
-        System.out.println("preLoad");
+        System.out.println("########################preLoad");
       }
 
       @Override public void postLoad() {
-        System.out.println("postLoad");
+        System.out.println("########################postLoad");
       }
     });
   }
 
   private void initDB() {
     DBEngineMaster bdEngine = new DBEngineJSON(this);
+    DBMapperMaster<UsersModel, UsersModelv2> myMapper =
+        new DBMapperMaster<UsersModel, UsersModelv2>("UsersModel", "UsersModelv2") {
+          @Override public <I, O> O convert (I input) {
+            UsersModel u1 = (UsersModel) input;
+            UsersModelv2 u2 = new UsersModelv2(u1.getName()+" Migrated", u1.getSurname()+" Migrated", "357");
+            return (O) u2;
+          }
+        };
+     bdEngine.setMigrationMappers(myMapper);
     mMyDataBase = new MyDB(bdEngine);
+    mMyDataBase.migrateDB(); //FOR EXECUTE MIGRATION
+
+
   }
 }

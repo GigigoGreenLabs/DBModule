@@ -22,9 +22,12 @@ public abstract class DBTableWrapperMaster {
     this.mDBSaveLoadCallback = mDBSaveLoadCallback;
   }
 
+  //public abstract ArrayList<Object> getItems(); //asv the add no work, in mappers
   public abstract ArrayList<? extends DBTableMaster> getItems();
 
   public abstract void setItems(ArrayList<? extends DBTableMaster> items);
+
+  public abstract void clearItems();
 
   public abstract void delItem(DBTableMaster item);
 
@@ -42,13 +45,20 @@ public abstract class DBTableWrapperMaster {
 
   public void save() {
     if (this.mDBSaveLoadCallback != null) this.mDBSaveLoadCallback.preSave();
-    mDBEngine.saveTable(this, mAlias);
+    mDBEngine.saveTable(this, mAlias + HashCodeTableFields());
     if (this.mDBSaveLoadCallback != null) this.mDBSaveLoadCallback.postSave();
   }
 
-  public void load() {
+  public ArrayList<? extends DBTableMaster> load() {
     if (this.mDBSaveLoadCallback != null) this.mDBSaveLoadCallback.preLoad();
-    mDBEngine.loadItemsTable(mAlias);
+    ArrayList<? extends DBTableMaster> arrayList =
+        mDBEngine.loadItemsTable(mAlias + HashCodeTableFields());
     if (this.mDBSaveLoadCallback != null) this.mDBSaveLoadCallback.postLoad();
+
+    return arrayList;
   }
+
+  /*NEWW*/
+  public abstract String HashCodeTableFields();
+  public abstract String ModelClass ();
 }
