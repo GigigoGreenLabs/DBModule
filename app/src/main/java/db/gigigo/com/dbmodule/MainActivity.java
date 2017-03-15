@@ -8,7 +8,6 @@ import com.gigigo.dbmodule.generated.MyDB;
 import db.gigigo.com.dbmaster.masterclass.DBEngineMaster;
 import db.gigigo.com.dbmaster.masterclass.DBMapperMaster;
 import db.gigigo.com.dbmaster.masterclass.DBSaveLoadCallback;
-import db.gigigo.com.dbmaster.masterclass.DBTableMaster;
 import db.gigigo.com.dbmodule.dbsample.DataGenerator;
 import db.gigigo.com.dbmodule.dbsample.NewTestModel;
 import db.gigigo.com.dbmodule.dbsample.UsersModel;
@@ -38,9 +37,8 @@ public class MainActivity extends AppCompatActivity {
         ArrayList<UsersModelv2> lst25 = new ArrayList<UsersModelv2>();
         for (int i = 0; i < 2; i++) {
 
-          lastUsersModel =
-              new UsersModelv2(DataGenerator.getRandomName()+"NEW", DataGenerator.getRandomSurName()+"NEW",
-                  System.currentTimeMillis() + "");
+          lastUsersModel = new UsersModelv2(DataGenerator.getRandomName() + "NEW",
+              DataGenerator.getRandomSurName() + "NEW", System.currentTimeMillis() + "");
           lst25.add(lastUsersModel);
         }
 
@@ -146,18 +144,16 @@ public class MainActivity extends AppCompatActivity {
 
   private void initDB() {
     DBEngineMaster bdEngine = new DBEngineJSON(this);
-    DBMapperMaster<UsersModel, UsersModelv2> myMapper =
-        new DBMapperMaster<UsersModel, UsersModelv2>("UsersModel", "UsersModelv2") {
-          @Override public <I, O> O convert (I input) {
-            UsersModel u1 = (UsersModel) input;
-            UsersModelv2 u2 = new UsersModelv2(u1.getName()+" Migrated", u1.getSurname()+" Migrated", "357");
-            return (O) u2;
-          }
-        };
-     bdEngine.setMigrationMappers(myMapper);
+    DBMapperMaster myMapper = new DBMapperMaster("UsersModel", "UsersModelv2") {
+      @Override public <I, O> O convert(I input) {
+        UsersModel u1 = (UsersModel) input;
+        UsersModelv2 u2 =
+            new UsersModelv2(u1.getName() + " Migrated", u1.getSurname() + " Migrated", "357");
+        return (O) u2;
+      }
+    };
+    bdEngine.setMigrationMappers(myMapper);
     mMyDataBase = new MyDB(bdEngine);
     mMyDataBase.migrateDB(); //FOR EXECUTE MIGRATION
-
-
   }
 }

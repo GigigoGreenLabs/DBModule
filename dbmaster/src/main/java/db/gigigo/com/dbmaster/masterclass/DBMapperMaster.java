@@ -3,7 +3,7 @@ package db.gigigo.com.dbmaster.masterclass;
 /**
  * Created by nubor on 09/03/2017.
  */
-public abstract class DBMapperMaster<I,O>  {
+public abstract class DBMapperMaster  {
   final String inputClass;
   final String outputClass;
 
