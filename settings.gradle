@@ -1,1 +1,1 @@
-include ':app', ':dbprocessor', ':dbmaster', ':dbjsonimpl'
+include  ':dbprocessor', ':dbmaster', ':dbjsonimpl'//,':app'
