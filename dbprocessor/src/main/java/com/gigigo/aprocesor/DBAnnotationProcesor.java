@@ -329,6 +329,7 @@ import javax.tools.JavaFileObject;
           + aliasTable
           + ";\n"
           + "  }");
+
       MigrateDBMethodBody = MigrateDBMethodBody + "this." + aliasTable + "().save();\n";
       try { // write the file
         JavaFileObject source = processingEnv.getFiler()
