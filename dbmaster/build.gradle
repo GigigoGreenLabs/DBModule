@@ -17,6 +17,7 @@ android {
     }
   }
 
+  //duplicate if we add project dbannotattion to dependencies
     packagingOptions {
       exclude '../dbprocessor/build/libs/dbprocessor.jar'
     }
@@ -25,8 +26,6 @@ android {
 dependencies {
   compile fileTree(dir: 'libs', include: ['*.jar'])
   testCompile 'junit:junit:4.12'
-  //compile project(':dbprocessor')
-  //compile 'com.android.support:appcompat-v7:25.2.0'
 }
 //asv this is the fuuuuuucking way, if we use cp or cmd in jitpack or whatver never works
 task copyTask(type: Copy) {
@@ -34,33 +33,30 @@ task copyTask(type: Copy) {
   into 'libs/'
 }
 copyTask.dependsOn(':dbprocessor:build')
-//processorTask.dependsOn(':dbmaster:generateDebugBuildConfig')
-preBuild.dependsOn(copyTask)
 
+preBuild.dependsOn(copyTask)
+/*
+* 1.-:processor:build will generate the jar file with our annotation and its processor
+* 2.-processorTask will copy this jar file to the android app/libs/ folder
+* 3.-The :app module will now reference the new jar.
+* */
 
   import org.gradle.internal.os.OperatingSystem;
 
-  //asv dependsOn (':dbmaster:generateDebugBuildConfig')
+  //asv keep that for rememnber the rigth way, and the OperatingSystem if is nice for use that
+//por una tarea de copia de files p`ropia de gradle
   /*annotation processor
   task processorTask(type: Exec) {
 
-    //todo this fail in windows/test for mac
     if (OperatingSystem.current().isWindows()) {
       commandLine 'cmd','/c','cp', '../dbprocessor/build/libs/dbprocessor.jar', 'libs/'
-      //commandLine 'cmd','/c','delete', '../dbprocessor/build/libs/dbprocessor.jar'
-
     } else {
       commandLine 'cp', '../dbprocessor/build/libs/dbprocessor.jar', 'libs/'
     }
   }
     processorTask.dependsOn(':dbprocessor:build')
-    //processorTask.dependsOn(':dbmaster:generateDebugBuildConfig')
     preBuild.dependsOn(processorTask)
-  /*
-  * 1.-:processor:build will generate the jar file with our annotation and its processor
-  * 2.-processorTask will copy this jar file to the android app/libs/ folder
-  * 3.-The :app module will now reference the new jar.
-  * */
+  */
 
 
 

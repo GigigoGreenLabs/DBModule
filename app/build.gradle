@@ -22,19 +22,15 @@ android {
     targetCompatibility JavaVersion.VERSION_1_7
   }
   publishNonDefault true
-//  packagingOptions {
-//    exclude '../dbprocessor/build/libs/dbprocessor.jar'
-//  }
- //fixme publisjnotdefaultartifact hjdhkjfh
+
 }
 
 dependencies {
- // compile fileTree(dir: 'libs', include: ['*.jar'])
+
   testCompile 'junit:junit:4.12'
   compile 'com.android.support:appcompat-v7:25.2.0'
   compile 'com.android.support:design:25.2.0'
 
-  compile project(':dbmaster')
- // compile project(path: ':dbprocessor')
+  compile project(':dbmaster') //this contain dbannotation in libs
   compile project(':dbjsonimpl')
 }

@@ -1,4 +1,8 @@
+ 
+
+
 # DB Module for Android
+========================================================================
 This library provide you a some annotations, for help you for create a complete and easy persist data model.
 
 This is compose by 4 modules:
@@ -15,6 +19,7 @@ You can create more dbMaster implementations, for example you can create SQLLite
 
 
 ### step 1: Add repo/dependency Root Build.gradlew
+----
 We upload the dependencies to jitpack, so you need to add jitpack to your repositories, for find it.
 (root build gradle)
 ```groovy
@@ -34,7 +39,8 @@ In the same gradle file you need to add:
   }
  ```
 ### step 2: ':app' build.gradle
-You must to add the plugin in your app, for annotation
+---
+You must to add the plugin in your app, for process annotations.
 ```groovy
 apply plugin: 'com.android.application'
 apply plugin: 'com.neenbedankt.android-apt' //add this line
@@ -48,107 +54,127 @@ compile('com.github.GigigoGreenLabs.DBModule:dbjsonimpl:0.09RC')
 ```
 
 ### step 3:  Getting started, add some code
-## create model
- 1บ@DataTable, set alias
- 2บ Extend DbMasterTable, implement hashcode method(PONER EJEMPLO)
- 3บ Create properties of Model, and generate getter/setter 
- 4บ Add @DataField for each field we want include in our persisten model
+----
+##### Create model
+ 1ยบ@DataTable, set alias
+ 2ยบ Extend DbMasterTable, implement hashcode method 
+ 3ยบ Create properties of Model, and generate getter/setter 
+ 4ยบ Add @DataField for each field we want include in our persisten model
+ ```java
+ @DataTable(alias = "Usuarios",isOnlyOneRecord = false)
+public class UsersModelv2 extends
+    DBTableMaster  {
+    @DataField String Name;
+    @DataField String Surname;
+    @DataField String Age;
+    ....
+     @Override public int hashCode() {
+      if (BuildConfig.VERSION_CODE < 19) {
+        int megaHash = 0;
+        megaHash = megaHash + hashCodeObject(this.getName());
+        megaHash = megaHash + hashCodeObject(this.getSurname());
+        megaHash = megaHash + hashCodeObject(this.getAge());
+        return megaHash;
+      } else {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+          return Objects.hash(Name, Surname,Age);
+        }
+      }
+      return -1;
+    }
+ ```
+ You can use the menu code->generate->generate hashcode & equals if you don't want to write your own hashcode method like the one above.
 
 ### step 4: Using generated code
-Is very important make a gradlew clean always you build, this is for keeping updated the generated class in apt directory. 
+Is very important make a gradlew :clean always you build, this is for keeping updated the generated class in apt directory. 
+
+You can check if the apt is working checking if the generated class are crreated in this path of your app:
+
+: \build\generated\source\apt\debug\com\gigigo\dbmodule\generated
+
+The annotation processor generate one class for manage the DataBase, usually named MyDB.class and one wrapper class for each one @DataTable.
+##### Init our DbEngine/MyDB.class
+In MyDB we have access to all Datatable wrapper for access/modify data models.
+To start using you must init the MyDb generated class, like this:
+```java
+ DBEngineMaster bdEngine = new DBEngineJSON(this);
+ mMyDataBase = new MyDB(bdEngine);
+```
+
+First we create a DBEngineMaster with the implementation we are wish, for now only have Json implementation, but in the future we can use SQLLite and others.
+
+The engine only need a context for work.
+##### Using DataTable Wrappers, select/modify model
+For access to wrapper in the MyDb we have created one method named like @DataTable Alias, with the same sample above about "Usuarios" we should have:
+
+```java
+//fill the items
+ ArrayList<UsersModelv2> lst25 = new ArrayList<UsersModelv2>();
+ ...
+mMyDataBase.Usuarios().setItems(lst25);
+//get the items
+mMyDataBase.Usuarios().getItems();
+//add one item
+mMyDataBase.Usuarios().addItem(myNewUserModelv2);
+//delete Item by index
+mMyDataBase.Usuarios().delItem(indexOfItemForDelete);
+//or by item 
+mMyDataBase.Usuarios().delItem(itemForDelete);
+//update item, by index
+mMyDataBase.Usuarios().setItem(itemForUpdate,index);
+//or, only with the item
+mMyDataBase.Usuarios().setItem(itemForUpdate);
+//find index of item
+int index=mMyDataBase.Usuarios().findItem(itemForFind);
+
+```
+##### Using DataTable Wrappers, query/sort model items
+We have one more feature, for make querys/selecction, we can access to this with method FROM(), somethign like this, for example:
+```java
+List<UsersModelv2> all = mMyDataBase.Usuarios()
+            .FROM()
+            .where("getName", eq("Alberto"))
+            .and("SurName",eq("Sainz"))
+            .orderBy("getSurname")
+            .all();
+```
+This get you items where name is "Alberto" and surname is "Sainz". We are using a modify lib called Coollection, you can check your readme in your github repository:
+https://github.com/wagnerandrade/coollection/blob/master/README.textile
+  
  
- comentar las fumadas de la migracion, como se debe cerar el nuevo modelo.
- comentar los features futuribles
+ ##### Migration feature
+ We implement a way for do migrations, if you need to modify the scheme of @Datatable you need create new pojo, and keep the same alias in your table. This way you can recover the previous data model and add then in the new pojo scheme.
  
+ For do this migration you must to give a mapper for convert from the previous model pojo to new pojo model.
  
- Comentar donde quedan las clases y explicar mydb y los wrapper.
+ If you need migration you need to init the myDb class like this:
  
- Para la parte del FROM(), readme de nuestro colega wagner
- h1. Coollection
-
-*A cool way to manipulate collections in Java.*
-
-Iterate over a collection is a medieval way to filtering, mapping and ordering. And with Java we are used to work like that. Coollection changes that, is the future, while closures don't arrives for Java.
-
-"Download Coollection 0.2.0":http://github.com/downloads/wagnerandrade/coollection/coollection-0.2.0.jar
-
-h2. How it works?
-
-It's easy to use. Just add @import static com.wagnerandade.coollection.Coollection.*;@ in your class and... More nothing!
-
-h2. How to use this?
-
-h3. 1 - Filter
-
-First you need a Collection. Here we create a Animal List, and we called it animals.
-
-<pre>
-List<Animal> animals;
-</pre>
-
-Later you goes add a lot of animals in this list.
-
-Now, you want to take *all* cats, it's easy for Coollections! In this case, name is a method (@animal.name()@).
-
-<pre>
-from(animals).where("name", eq("Cat")).all();
-</pre>
-
-Or, would the *first* animal with 2 year old? Easy too!
-
-<pre>
-from(animals).where("age", eq(2)).first();
-</pre>
-
-h3. 2 - Filter specification
-
-You can be more specific in your query, adding more specifications, like *and* and *or*.
-
-<pre>
-from(animals).where("name", eq("Lion")).and("age", eq(2)).all();
-from(animals).where("name", eq("Dog")).or("age", eq(5)).all();
-</pre>
-
-h3. 3 - Matchers
-
-There are other matchers to be precise!
-
-<pre>
-eq("Cat")
-eqIgnoreCase("Cat")
-contains("og")
-greaterThan(3)
-lessThan(10)
-isNull()
-</pre>
-
-Or a special matcher, called *not*.
-
-<pre>
-not(eq("Bird"))
-not(contains("at"))
-not(isNull())
-</pre>
-
-h3. 4 - Order
-
-Order is a very interesting feature to sort your collection.
-
-<pre>
-from(animals).where("name", eq("Cat")).orderBy("age").all();
-from(animals).where("age", eq(5)).orderBy("name", Order.DESC).first();
-</pre>
-
-You can use just order, without filter.
-
-<pre>
-from(animals).orderBy("name");
-</pre>
-
-Be happy!
+ ```java
+ DBEngineMaster bdEngine = new DBEngineJSON(this);
+ //create mapper and implement  
+    DBMapperMaster myMapper = new DBMapperMaster("UsersModel", "UsersModelv2") {
+      @Override public <I, O> O convert(I input) {
+        UsersModel u1 = (UsersModel) input;
+        UsersModelv2 u2 =
+            new UsersModelv2(u1.getName() + " Migrated", u1.getSurname() + " Migrated", "357");
+        return (O) u2;
+      }
+    };
+    //set the mapper/s to engine
+    bdEngine.setMigrationMappers(myMapper);
+    //create database with engine
+     mMyDataBase = new MyDB(bdEngine);
+     //call for execute migration before all
+    mMyDataBase.migrateDB();  
+  ```
+  
+  
+ 
+  
  
  Thanks to Wagner Andrade author of https://github.com/wagnerandrade/coollection that is     very usefull tool for emulate "linQ" in Java/Android and we use in our DbEngineMaster
  
 That's all!!
  
  
+

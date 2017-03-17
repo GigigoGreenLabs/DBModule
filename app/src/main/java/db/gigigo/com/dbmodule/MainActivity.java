@@ -93,7 +93,8 @@ public class MainActivity extends AppCompatActivity {
 
         List<UsersModelv2> all = mMyDataBase.Usuarios()
             .FROM()
-            .where("getName", eq("Pepito"))
+            .where("getName", eq("Alberto"))
+            .and("SurName",eq("Sainz"))
             .orderBy("getSurname")
             .all();
         if (all.size() > 0) {
