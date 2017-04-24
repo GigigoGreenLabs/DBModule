@@ -33,4 +33,5 @@ dependencies {
 
   compile project(':dbmaster') //this contain dbannotation in libs
   compile project(':dbjsonimpl')
+  compile project(':dbsqliteimpl')
 }

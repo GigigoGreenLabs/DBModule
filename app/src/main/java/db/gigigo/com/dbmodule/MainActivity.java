@@ -5,6 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import com.gigigo.dbmodule.generated.MyDB;
+import com.gigigo.dbsqliteimpl.DBEngineSQLLite;
 import db.gigigo.com.dbmaster.masterclass.DBEngineMaster;
 import db.gigigo.com.dbmaster.masterclass.DBMapperMaster;
 import db.gigigo.com.dbmaster.masterclass.DBSaveLoadCallback;
@@ -20,7 +21,7 @@ import java.util.List;
 import static com.wagnerandade.coollection.Coollection.eq;
 
 public class MainActivity extends AppCompatActivity {
-  public static MyDB mMyDataBase;//asv this maybe in the application
+  public static MyDB  mMyDataBase;//asv this maybe in the application
   UsersModelv2 lastUsersModel;
   NewTestModel lastNewTestModel;
 
@@ -35,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
       @Override public void onClick(View view) {
 
         ArrayList<UsersModelv2> lst25 = new ArrayList<UsersModelv2>();
-        for (int i = 0; i < 2; i++) {
+        for (int i = 0; i < 20; i++) {
 
           lastUsersModel = new UsersModelv2(DataGenerator.getRandomName() + "NEW",
               DataGenerator.getRandomSurName() + "NEW", System.currentTimeMillis() + "");
@@ -144,7 +145,7 @@ public class MainActivity extends AppCompatActivity {
   }
 
   private void initDB() {
-    DBEngineMaster bdEngine = new DBEngineJSON(this);
+    DBEngineMaster bdEngine = new DBEngineSQLLite(this); //new DBEngineJSON(this);
     DBMapperMaster myMapper = new DBMapperMaster("UsersModel", "UsersModelv2") {
       @Override public <I, O> O convert(I input) {
         UsersModel u1 = (UsersModel) input;

@@ -12,6 +12,7 @@
             <option value="$PROJECT_DIR$/dbjsonimpl" />
             <option value="$PROJECT_DIR$/dbmaster" />
             <option value="$PROJECT_DIR$/dbprocessor" />
+            <option value="$PROJECT_DIR$/dbsqliteimpl" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />
