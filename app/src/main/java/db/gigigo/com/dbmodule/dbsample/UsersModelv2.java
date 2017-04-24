@@ -9,16 +9,16 @@ import java.util.Objects;
 
 /**
  * Created by nubor on 14/03/2017.
- */
-@DataTable(alias = "Usuarios",isOnlyOneRecord = false)
+
+@DataTable(alias = "Usuarios",isOnlyOneRecord = false)*/
 public class UsersModelv2 extends
     DBTableMaster  {
-    @DataField String Name;
-    @DataField String Surname;
-    @DataField String Age;
-    //  String Name;
-    //  String Surname;
-    //  String Age;
+    //@DataField String Name;
+    //@DataField String Surname;
+    //@DataField String Age;
+      String Name;
+      String Surname;
+      String Age;
     public UsersModelv2() {
     }
 

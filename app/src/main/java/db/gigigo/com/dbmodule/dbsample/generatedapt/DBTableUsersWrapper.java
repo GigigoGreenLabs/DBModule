@@ -33,6 +33,10 @@ public class DBTableUsersWrapper extends DBTableWrapperMaster {
     }
   }
 
+  @Override public void clearItems() {
+
+  }
+
   public void mySetItems(ArrayList<UsersModel> items) {
     mItems = (ArrayList<UsersModel>) items;
     mDBEngine.saveTable(this, this.mAlias);
@@ -91,6 +95,14 @@ public class DBTableUsersWrapper extends DBTableWrapperMaster {
   @Override public Query<UsersModel> FROM() {
     Query<UsersModel> from = from(this.mItems);
     return from;
+  }
+
+  @Override public String HashCodeTableFields() {
+    return null;
+  }
+
+  @Override public String ModelClass() {
+    return null;
   }
   /**/
 }
