@@ -1,12 +1,15 @@
 package com.gigigo.dbsqliteimpl;
 
 import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 import db.gigigo.com.dbmaster.masterclass.DBEngineMaster;
 import db.gigigo.com.dbmaster.masterclass.DBMapperMaster;
 import db.gigigo.com.dbmaster.masterclass.DBTableMaster;
 import db.gigigo.com.dbmaster.masterclass.DBTableWrapperMaster;
 import db.gigigo.com.dbmaster.schema.DBScheme;
 import db.gigigo.com.dbmaster.schema.DBSchemeItem;
+import db.gigigo.com.dbmaster.schema.DBTableFieldScheme;
 import db.gigigo.com.dbmaster.schema.DBTableScheme;
 import java.util.ArrayList;
 
@@ -15,8 +18,12 @@ import java.util.ArrayList;
  */
 public class DBEngineSQLLite extends DBEngineMaster {
 
+  SqliteManager mSqliteManager;
+  SQLiteDatabase sqLiteDatabase;
+
   public DBEngineSQLLite(Context context) {
     super(context);
+    mSqliteManager = new SqliteManager(mContext, null);
   }
 
   @Override public void createDB(DBScheme dbMasterScheme) {
@@ -24,24 +31,113 @@ public class DBEngineSQLLite extends DBEngineMaster {
     //aqui se crearia la bd de realm sql lite o lo q fuera y no se añadiria ningun scheme Item,
     //de añadir o tal se ocuparia el save del wrapper llamando a engineDb saveTableSchema
     //json nothing to do
+    Log.v("DBNAME", "" + dbMasterScheme.getDbName());
+    mSqliteManager = new SqliteManager(mContext, dbMasterScheme.getDbName());
+    sqLiteDatabase = mSqliteManager.getWritableDatabase();
+    Log.v("DBNAMEEXISTS",
+        "" + mSqliteManager.checkIfDatabaseExists(this.mContext, dbMasterScheme.getDbName()));
+  }
+
+  public DBScheme loadDBScheme2() {
+   /* System.out.println("***************** loadDBScheme" );
+    String strFileName =  SCHEME_DB_FILE_NAME;
+
+   return DataUtils.readSerializable(this.mContext,  strFileName);*/
+
+    ArrayList<String> tableNameList = new ArrayList<String>();
+    ArrayList<DBSchemeItem> columnList = new ArrayList<DBSchemeItem>();
+
+    DBScheme db = new DBScheme();
+    db.setDbName(SCHEME_DB_FILE_NAME);
+
+    tableNameList = mSqliteManager.getTableList(sqLiteDatabase);
+    DBSchemeItem dbSchemeItemAux;
+    for (String tableName : tableNameList) {
+      dbSchemeItemAux = new DBSchemeItem(tableName, "", "", System.currentTimeMillis());
+      columnList.add(dbSchemeItemAux);
+    }
+    db.setLstSchemaItems(columnList);
+
+    return db;
   }
 
   @Override public boolean isDBCreated(DBScheme dbMasterScheme) {
-    return  DataUtils.isFileExists(SCHEME_DB_FILE_NAME);
+    mSqliteManager = new SqliteManager(mContext, dbMasterScheme.getDbName());
+    sqLiteDatabase = mSqliteManager.getWritableDatabase();
+    return mSqliteManager.checkIfDatabaseExists(this.mContext, dbMasterScheme.getDbName());
   }
 
   @Override public boolean isDBTableCreated(String tableName) {
-    return DataUtils.isFileExists(tableName + SCHEME_TABLE_SUFFIX);
+    //return DataUtils.isFileExists(tableName + SCHEME_TABLE_SUFFIX);
+    return mSqliteManager.checkIfTableExist(sqLiteDatabase, tableName);
+  }
+
+  @Override public void createDBScheme(DBScheme dbScheme) {
+    System.out.println("***************** createDBScheme" + dbScheme.toString());
+    String strFileName = SCHEME_DB_FILE_NAME;
+    DataUtils.removeSerializable(this.mContext, strFileName);
+    DataUtils.saveSerializable(this.mContext, dbScheme, strFileName);
+  }
+
+  @Override public DBScheme loadDBScheme() {
+    System.out.println("***************** loadDBScheme");
+    String strFileName = SCHEME_DB_FILE_NAME;
+
+    return DataUtils.readSerializable(this.mContext, strFileName);
   }
 
   @Override public void createDBTable(DBTableScheme table) {
-    System.out.println("*****************create DB Table" + table.getLstTableFields().size());
+    //System.out.println("*****************create DB Table" + table.getLstTableFields().size());
     //json nothing to do
+
+    //1º read dbtable scheme
+    //2º for con los rows de dicha tabla(especificacion de los campos, las columnas)
+    //3º por cada loop, traducir el tipo java al tipo analogo de sqlite
+    //lstFields_Testeo.add(new DBTableFieldScheme("java.lang.String", "Title"));
+    //y utilizando el name del field para nombrar la columna
+
+    if (!mSqliteManager.checkIfTableExist(sqLiteDatabase,table.getTableAlias())){
+      ArrayList<DBTableFieldScheme> arrayFields = new ArrayList<>();
+      DBTableScheme dbTableScheme = this.loadTableSchema(table.getTableAlias(), "");
+      if (dbTableScheme != null && dbTableScheme.getLstTableFields() != null) {
+        arrayFields = dbTableScheme.getLstTableFields();
+      }
+
+      String createTableStr = "CREATE TABLE " + table.getTableAlias()+ "( ";
+
+      for (int i = 0; i < arrayFields.size(); i++) {
+
+        if (i != arrayFields.size()-1){
+          createTableStr +=
+              arrayFields.get(i).getNameField() + " " + convertJavaType2SqliteType(arrayFields.get(i).getTypeDBField())+ ",";
+        }else{
+          createTableStr +=
+              arrayFields.get(i).getNameField() + " " + convertJavaType2SqliteType(arrayFields.get(i).getTypeDBField())+ "," + ")";
+
+        }
+      }
+
+      Log.v("STRING",""+ createTableStr);
+      sqLiteDatabase.execSQL(createTableStr);
+
+    }
+
+
+    //todo ejecutar la senctencia SQL de create table en la   SQLiteDatabase sqLiteDatabase;
 
   }
 
+  private String convertJavaType2SqliteType(String typeDBField) {
+
+    if (typeDBField.equals("java.lang.String")) {
+      return "TEXT";
+    } else {
+      return null;
+    }
+  }
+
   @Override public void clearDBTable(String tableAlias) {
-    System.out.println("*****************clearDBTable" + tableAlias);
+    /*System.out.println("*****************clearDBTable" + tableAlias);
     //this must be delete all items  DBTable  with the name alias, and all the hashcodeDBFields
     DBScheme dbScheme = DataUtils.readSerializable(this.mContext, SCHEME_DB_FILE_NAME);
     ArrayList<DBSchemeItem> newSchemaItems = new ArrayList<>();
@@ -55,11 +151,11 @@ public class DBEngineSQLLite extends DBEngineMaster {
       }
     }
     dbScheme.setLstSchemaItems(newSchemaItems);
-    DataUtils.saveSerializable(this.mContext, dbScheme, SCHEME_DB_FILE_NAME);
+    DataUtils.saveSerializable(this.mContext, dbScheme, SCHEME_DB_FILE_NAME);*/
   }
 
   @Override public void saveTable(DBTableWrapperMaster tableWrapper, String tableAlias) {
-
+/*
     //region migration code
     DBScheme dbScheme = DataUtils.readSerializable(this.mContext, SCHEME_DB_FILE_NAME);
     ArrayList<DBSchemeItem> newSchemaItems = new ArrayList<>();
@@ -137,66 +233,56 @@ public class DBEngineSQLLite extends DBEngineMaster {
 
     //save the items of tablewrapper
     DataUtils.saveSerializable(this.mContext, tableWrapper.getItems(), tableAlias);
-    System.out.println("*****************saveTable" + tableAlias);
+    System.out.println("*****************saveTable" + tableAlias);*/
   }
 
   @Override public ArrayList<? extends DBTableMaster> loadItemsTable(String tableAlias) {
-    System.out.println("*****************loadItemsTable" + tableAlias);
+    /*System.out.println("*****************loadItemsTable" + tableAlias);
     ArrayList<? extends DBTableMaster> arrayList =
         DataUtils.readSerializable(this.mContext, tableAlias);
     if (arrayList == null) arrayList = new ArrayList<>();
-    return arrayList;
+    return arrayList;*/
+    return new ArrayList<>();
   }
 
   @Override public void clearTable(String tableAlias) {
-    System.out.println("*****************clearTable" + tableAlias);
+    //System.out.println("*****************clearTable" + tableAlias);
   }
   //region Schema fields Table
 
   @Override public DBTableScheme getDBTableSchema(String tableAlias) {
-    System.out.println("*****************clearDBTable" + tableAlias);
+   /* System.out.println("*****************clearDBTable" + tableAlias);
     //this method maybe used by engines sql, or not need it because the creation will be
     //by createDBTable, but maybe for create the inserts/update
 
     String strFileName = tableAlias + SCHEME_TABLE_SUFFIX;
     DBTableScheme myTableScheme = DataUtils.readSerializable(this.mContext, strFileName);
 
-    return myTableScheme;
+    return myTableScheme;*/
+    return new DBTableScheme("tabla");
   }
 
-  @Override public void createDBScheme(DBScheme dbScheme) {
-    System.out.println("***************** createDBScheme" + dbScheme.toString());
-    String strFileName =  SCHEME_DB_FILE_NAME;
-    DataUtils.removeSerializable(this.mContext, strFileName);
-    DataUtils.saveSerializable(this.mContext, dbScheme, strFileName);
-  }
-
-  @Override public DBScheme loadDBScheme() {
-    System.out.println("***************** loadDBScheme" );
-    String strFileName =  SCHEME_DB_FILE_NAME;
-
-   return DataUtils.readSerializable(this.mContext,  strFileName);
-  }
   @Override public void createDBTableScheme(DBTableScheme dbScheme) {
-    System.out.println("*****************  createDBTableScheme" + dbScheme.toString());
+   /* System.out.println("*****************  createDBTableScheme" + dbScheme.toString());
     //esto crea un file llamado aliastable+Scheme.json que tiene la definicion de los campos que
     //esto guarda el file con el scheme y haría el createtable, si existiese deberia hacer droptable
-    //create table con el array de campos q contiene el table
+    //create table con el array de campos q contiene el table*/
     String strFileName = dbScheme.getTableAlias() + SCHEME_TABLE_SUFFIX;
-  //  DataUtils.removeSerializable(this.mContext, strFileName);
+    DataUtils.removeSerializable(this.mContext, strFileName);
     DataUtils.saveSerializable(this.mContext, dbScheme, strFileName);
-    //create table y tal
+    //create table y tal*/
   }
 
   /*ESTOS DOS METODOS DE MOMENTO NO SE UTILIZAN, el load no se si el esl get o q es*/
   @Override public void saveTableSchema(String tableAlias, String HashCodeDBFields) {
-    System.out.println("*****************saveTableSchema" + tableAlias + HashCodeDBFields);
-  //  String strFileName = dbScheme.getTableAlias() + SCHEME_TABLE_SUFFIX;
+    //System.out.println("*****************saveTableSchema" + tableAlias + HashCodeDBFields);
+    //  String strFileName = dbScheme.getTableAlias() + SCHEME_TABLE_SUFFIX;
   }
 
   @Override public DBTableScheme loadTableSchema(String tableAlias, String HashCodeDBFields) {
-    System.out.println("*****************loadTableSchema" + tableAlias + HashCodeDBFields);
-    return null;
+    String strFileName = tableAlias + SCHEME_TABLE_SUFFIX;
+    //System.out.println("*****************loadTableSchema" + tableAlias + HashCodeDBFields);
+    return DataUtils.readSerializable(mContext, strFileName);
   }
   //endregion
 }
