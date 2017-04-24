@@ -15,16 +15,16 @@ import java.util.Objects;
 /**
  * Created by nubor on 06/03/2017.
  */
-@DataTable(alias = "Usuarios",isOnlyOneRecord = false)
+//@DataTable(alias = "Usuarios",isOnlyOneRecord = false)
 public class UsersModel extends DBTableMaster {
-   //String Name;
-   //String Surname;
-   //String id;
+   String Name;
+   String Surname;
+   String id;
 
 
-  @DataField String Name;
-  @DataField String Surname;
-  @DataField String id;
+  //@DataField String Name;
+  //@DataField String Surname;
+  //@DataField String id;
   public UsersModel() {
   }
 

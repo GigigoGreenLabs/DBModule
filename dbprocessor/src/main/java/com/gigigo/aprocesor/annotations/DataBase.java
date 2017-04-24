@@ -5,5 +5,5 @@ package com.gigigo.aprocesor.annotations;
  * not used now, with json
  */
 public @interface DataBase {
-  String name() default "myowndb";
+  String name();
 }
