@@ -26,12 +26,14 @@ android {
 }
 
 dependencies {
-
   testCompile 'junit:junit:4.12'
   compile 'com.android.support:appcompat-v7:25.2.0'
   compile 'com.android.support:design:25.2.0'
-
-  compile project(':dbmaster') //this contain dbannotation in libs
+  compile project(':dbmaster')
+  //this contain dbannotation in libs
   compile project(':dbjsonimpl')
   compile project(':dbsqliteimpl')
+
+
+  compile project(':sqllitemanager')
 }

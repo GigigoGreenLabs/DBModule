@@ -9,6 +9,7 @@
       <module fileurl="file://$PROJECT_DIR$/dbprocessor/dbprocessor.iml" filepath="$PROJECT_DIR$/dbprocessor/dbprocessor.iml" />
       <module fileurl="file://$PROJECT_DIR$/dbjsonimpl/dbserializableimpl.iml" filepath="$PROJECT_DIR$/dbjsonimpl/dbserializableimpl.iml" />
       <module fileurl="file://$PROJECT_DIR$/dbsqliteimpl/dbsqliteimpl.iml" filepath="$PROJECT_DIR$/dbsqliteimpl/dbsqliteimpl.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sqllitemanager/sqllitemanager.iml" filepath="$PROJECT_DIR$/sqllitemanager/sqllitemanager.iml" />
     </modules>
   </component>
 </project>

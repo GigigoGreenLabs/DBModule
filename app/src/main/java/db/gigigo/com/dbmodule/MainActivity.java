@@ -1,27 +1,28 @@
 package db.gigigo.com.dbmodule;
 
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
-import com.gigigo.dbmodule.generated.MyDB;
 import com.gigigo.dbsqliteimpl.DBEngineSQLLite;
+import com.gigigo.dbsqliteimpl.SqliteManager;
 import db.gigigo.com.dbmaster.masterclass.DBEngineMaster;
 import db.gigigo.com.dbmaster.masterclass.DBMapperMaster;
 import db.gigigo.com.dbmaster.masterclass.DBSaveLoadCallback;
 import db.gigigo.com.dbmodule.dbsample.DataGenerator;
 import db.gigigo.com.dbmodule.dbsample.NewTestModel;
+import sqllitefortest.SQLliteDB;
 import db.gigigo.com.dbmodule.dbsample.UsersModel;
 
 import db.gigigo.com.dbmodule.dbsample.UsersModelv2;
-import db.gigigo.com.dbserializableimpl.DBEngineJSON;
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.wagnerandade.coollection.Coollection.eq;
 
 public class MainActivity extends AppCompatActivity {
-  public static MyDB  mMyDataBase;//asv this maybe in the application
+  public static SQLliteDB mMyDataBase;//asv this maybe in the application
   UsersModelv2 lastUsersModel;
   NewTestModel lastNewTestModel;
 
@@ -30,27 +31,39 @@ public class MainActivity extends AppCompatActivity {
     setContentView(R.layout.activity_main);
 
     initDB();
+   // mMyDataBase.Usuarios().addItem(new UsersModelv2("Pepe","Monder","4"));
+   // mMyDataBase.Usuarios().save();
+
+
+
     setCallbackLoadSave();
     Button btnAdd = (Button) findViewById(R.id.btnAdd);
     btnAdd.setOnClickListener(new View.OnClickListener() {
       @Override public void onClick(View view) {
 
-        ArrayList<UsersModelv2> lst25 = new ArrayList<UsersModelv2>();
-        for (int i = 0; i < 20; i++) {
+        ArrayList<UsersModelv2> lst20 = new ArrayList<UsersModelv2>();
+        for (int i = 0; i < 5; i++) {
 
-          lastUsersModel = new UsersModelv2(DataGenerator.getRandomName() + "NEW",
-              DataGenerator.getRandomSurName() + "NEW", System.currentTimeMillis() + "");
-          lst25.add(lastUsersModel);
+          lastUsersModel = new UsersModelv2(DataGenerator.getRandomName() + "SQL"+i,
+              DataGenerator.getRandomSurName() + "SQL"+i, System.currentTimeMillis() + "");
+          lst20.add(lastUsersModel);
+          mMyDataBase.Usuarios().addItem(lastUsersModel);
+
+
         }
 
-        mMyDataBase.Usuarios().setItems(lst25);
+       // mMyDataBase.Usuarios().setItems(lst20);
+        mMyDataBase.Usuarios().save();
       }
     });
 
     Button btnDel = (Button) findViewById(R.id.btnDel);
     btnDel.setOnClickListener(new View.OnClickListener() {
       @Override public void onClick(View view) {
-        mMyDataBase.Usuarios().delItem(lastUsersModel);
+        if(lastUsersModel!=null) {
+          mMyDataBase.Usuarios().delItem(lastUsersModel);
+          mMyDataBase.Usuarios().save();
+        }
       }
     });
 
@@ -118,6 +131,41 @@ public class MainActivity extends AppCompatActivity {
     });
 
     // mMyDataBase.Usuarios().createFrom(mMyDataBase.Usuarios())
+
+
+    Button btnSqlAdmin = (Button) findViewById(R.id.btnsqladmin);
+    btnSqlAdmin.setOnClickListener(new View.OnClickListener() {
+      @Override public void onClick(View view) {
+        com.gigigo.gigigocrud_sqliteandroid.MainActivity.open(MainActivity.this);
+
+      }
+    });
+  }
+
+  private void createSampleDB() {
+   SqliteManager sql = new SqliteManager(getApplicationContext(), "DBMODULE");
+    SQLiteDatabase db = sql.getWritableDatabase();
+    String sqlCreate = "CREATE TABLE DBModule (codigo INTEGER, nombre TEXT)";
+    db.execSQL(sqlCreate);
+
+    if(db != null)
+    {
+
+      for(int i=1; i<=5; i++)
+      {
+
+        int codigo = i;
+        String nombre = "DBModule" + i;
+
+        db.execSQL("INSERT INTO Usuarios (codigo, nombre) " +
+            "VALUES (" + codigo + ", '" + nombre +"')");
+      }
+
+
+      db.close();
+    }
+
+
   }
 
   long timeFirst = 0;
@@ -154,8 +202,9 @@ public class MainActivity extends AppCompatActivity {
         return (O) u2;
       }
     };
+
     bdEngine.setMigrationMappers(myMapper);
-    mMyDataBase = new MyDB(bdEngine);
-    mMyDataBase.migrateDB(); //FOR EXECUTE MIGRATION
+    mMyDataBase = new SQLliteDB(bdEngine);
+    //mMyDataBase.migrateDB(); //FOR EXECUTE MIGRATION
   }
 }

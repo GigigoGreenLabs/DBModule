@@ -1,1 +1,1 @@
-include  ':dbprocessor', ':dbmaster', ':dbjsonimpl',':dbsqliteimpl',':app'
+include ':dbprocessor', ':dbmaster', ':dbjsonimpl', ':dbsqliteimpl', ':app', ':sqllitemanager'

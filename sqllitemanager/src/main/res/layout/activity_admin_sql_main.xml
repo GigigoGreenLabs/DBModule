@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.gigigo.gigigocrud_sqliteandroid.MainActivity"
+    android:weightSum="1"
+    >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.5"
+        android:gravity="center_vertical|center_horizontal"
+        >
+      <TextView
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:textSize="20dp"
+          android:gravity="center"
+          android:text="SQLite Manager"
+          android:textStyle="bold|italic"/>
+
+    </LinearLayout>
+
+
+  <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_weight="0.5"
+      android:gravity="center_vertical|center_horizontal"
+      >
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="20dp"
+        android:textColor="@android:color/white"
+        android:background="@color/colorPrimary"
+        android:text="Enter"
+        android:id="@+id/btnEnterSample"
+        />
+  </LinearLayout>
+
+  </LinearLayout>

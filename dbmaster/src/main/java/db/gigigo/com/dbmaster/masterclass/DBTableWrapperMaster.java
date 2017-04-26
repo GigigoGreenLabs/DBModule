@@ -21,6 +21,17 @@ public abstract class DBTableWrapperMaster {
   public void setmDBSaveLoadCallback(DBSaveLoadCallback mDBSaveLoadCallback) {
     this.mDBSaveLoadCallback = mDBSaveLoadCallback;
   }
+//asv solucionar el tema del tipo de objeto que cabe aqui
+  public ArrayList<Object> itemsForInsert = new ArrayList<>();
+  public ArrayList<Object> itemsForDelete = new ArrayList<>();
+  public ArrayList<Object> itemsForUpdate = new ArrayList<>();
+
+  private void resetItemsFor() {
+    itemsForInsert = new ArrayList<>();
+    itemsForDelete = new ArrayList<>();
+    itemsForUpdate = new ArrayList<>();
+  }
+
 
   //public abstract ArrayList<Object> getItems(); //asv the add no work, in mappers
   public abstract ArrayList<? extends DBTableMaster> getItems();
@@ -47,6 +58,7 @@ public abstract class DBTableWrapperMaster {
     if (this.mDBSaveLoadCallback != null) this.mDBSaveLoadCallback.preSave();
     mDBEngine.saveTable(this, mAlias + HashCodeTableFields());
     if (this.mDBSaveLoadCallback != null) this.mDBSaveLoadCallback.postSave();
+    resetItemsFor();
   }
 
   public ArrayList<? extends DBTableMaster> load() {
@@ -54,7 +66,7 @@ public abstract class DBTableWrapperMaster {
     ArrayList<? extends DBTableMaster> arrayList =
         mDBEngine.loadItemsTable(mAlias + HashCodeTableFields());
     if (this.mDBSaveLoadCallback != null) this.mDBSaveLoadCallback.postLoad();
-
+    resetItemsFor();
     return arrayList;
   }
 

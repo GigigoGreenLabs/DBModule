@@ -111,13 +111,14 @@ public class SqliteManager extends SQLiteOpenHelper {
   }
 
   public boolean checkIfTableExist(SQLiteDatabase db, String tablename) {
-    Log.v("TABLEEXIST", "" + tablename);
+
     boolean tableExists = false;
     String tableListStr =
         "SELECT name FROM sqlite_master WHERE type='table' AND name='" + tablename + "';";
-    Cursor cursor = db.rawQuery(tableListStr, null);
+    Cursor cursor = db.rawQuery(tableListStr,null);
     if (cursor.moveToFirst()) {
       tableExists = true;
+      Log.v("TABLEEXIST", "TRUE" + tablename);
     }
     return tableExists;
   }
