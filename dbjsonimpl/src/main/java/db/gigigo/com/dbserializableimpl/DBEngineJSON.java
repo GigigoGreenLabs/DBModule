@@ -144,6 +144,10 @@ public class DBEngineJSON extends DBEngineMaster {
     System.out.println("*****************loadItemsTable" + tableAlias);
     ArrayList<? extends DBTableMaster> arrayList =
         DataUtils.readSerializable(this.mContext, tableAlias);
+
+
+
+
     if (arrayList == null) arrayList = new ArrayList<>();
     return arrayList;
   }

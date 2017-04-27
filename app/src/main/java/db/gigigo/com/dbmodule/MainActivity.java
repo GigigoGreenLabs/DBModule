@@ -3,15 +3,19 @@ package db.gigigo.com.dbmodule;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import com.gigigo.dbsqliteimpl.DBEngineSQLLite;
+import com.gigigo.dbsqliteimpl.ModelObj;
 import com.gigigo.dbsqliteimpl.SqliteManager;
+import com.gigigo.gigigocrud_sqliteandroid.Manager.SQLiteManager;
 import db.gigigo.com.dbmaster.masterclass.DBEngineMaster;
 import db.gigigo.com.dbmaster.masterclass.DBMapperMaster;
 import db.gigigo.com.dbmaster.masterclass.DBSaveLoadCallback;
 import db.gigigo.com.dbmodule.dbsample.DataGenerator;
 import db.gigigo.com.dbmodule.dbsample.NewTestModel;
+import java.io.File;
 import sqllitefortest.SQLliteDB;
 import db.gigigo.com.dbmodule.dbsample.UsersModel;
 
@@ -34,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
    // mMyDataBase.Usuarios().addItem(new UsersModelv2("Pepe","Monder","4"));
    // mMyDataBase.Usuarios().save();
 
-
+    //createSampleDB();
 
     setCallbackLoadSave();
     Button btnAdd = (Button) findViewById(R.id.btnAdd);
@@ -71,15 +75,41 @@ public class MainActivity extends AppCompatActivity {
     btnList.setOnClickListener(new View.OnClickListener() {
       @Override public void onClick(View view) {
 
-        for (UsersModelv2 item : mMyDataBase.Usuarios().getItems()) {
+    /*    SqliteManager dbmanager = new SqliteManager(getApplicationContext(), "Usuarios");
+
+        SQLiteDatabase db = dbmanager.getWritableDatabase();
+        File file = dbmanager.loadDatabaseAsJson("Usuarios",db);
+        dbmanager.readFromFile(file);*/
+
+        //NEW USERMODEL SQLLITE-NOT-VALID
+
+        /*ArrayList<ModelObj> items = mMyDataBase.Usuarios().getItemsModelObj();
+
+        ArrayList<String> itemsStrings = new ArrayList<String>();
+
+        for (ModelObj item : items) {
+          itemsStrings = item.getList();
+          System.out.print("ROW: ");
+          for (String itemsString : itemsStrings) {
+            System.out.print(itemsString + " ");
+          }
+          System.out.println(" ");
+
+        }*/
+
+
+        //OLD USERMODEL JSON-VALID
+
+       /* for (UsersModelv2 item : mMyDataBase.Usuarios().getItems()) {
           System.out.println("Name: "
               + item.getName()
               + " SurName: "
               + item.getSurname()
               + " hashcode: "
               + item.hashCode());
-        }
-        System.out.println("TOTAL: " + mMyDataBase.Usuarios().getItems().size());
+        }*/
+
+        //System.out.println("TOTAL: " + mMyDataBase.Usuarios().getItemsModelObj().size());
       }
     });
 
@@ -87,18 +117,22 @@ public class MainActivity extends AppCompatActivity {
     btnQuery.setOnClickListener(new View.OnClickListener() {
       @Override public void onClick(View view) {
 
-        List<UsersModelv2> all =
-            mMyDataBase.Usuarios().FROM().where("Name", eq("Pepito")).orderBy("Surname").all();
 
-        for (UsersModelv2 item : all) {
-          System.out.println("Name: "
-              + item.getName()
-              + " SurName: "
-              + item.getSurname()
-              + " hashcode: "
-              + item.hashCode());
-        }
-        System.out.println("TOTAL pepitos: " + all.size());
+          List<UsersModelv2> all =
+              mMyDataBase.Usuarios().FROM().where("Name", eq("Pepito")).orderBy("Surname").all();
+
+          for (UsersModelv2 item : all) {
+            System.out.println("Name: "
+                + item.getName()
+                + " SurName: "
+                + item.getSurname()
+                + " hashcode: "
+                + item.hashCode());
+          }
+          System.out.println("TOTAL pepitos: " + all.size());
+
+
+
       }
     });
     Button btnUpdate = (Button) findViewById(R.id.btnUpdate);
@@ -143,9 +177,9 @@ public class MainActivity extends AppCompatActivity {
   }
 
   private void createSampleDB() {
-   SqliteManager sql = new SqliteManager(getApplicationContext(), "DBMODULE");
+   SqliteManager sql = new SqliteManager(getApplicationContext(), "Usuarios");
     SQLiteDatabase db = sql.getWritableDatabase();
-    String sqlCreate = "CREATE TABLE DBModule (codigo INTEGER, nombre TEXT)";
+    String sqlCreate = "CREATE TABLE Usuarios (codigo INTEGER, nombre TEXT)";
     db.execSQL(sqlCreate);
 
     if(db != null)

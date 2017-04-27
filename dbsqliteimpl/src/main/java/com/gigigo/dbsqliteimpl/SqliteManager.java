@@ -5,10 +5,21 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.Environment;
 import android.util.Log;
 import android.widget.EditText;
 import android.widget.Toast;
+import db.gigigo.com.dbmaster.masterclass.DBTableMaster;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Serializable;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -23,6 +34,7 @@ public class SqliteManager extends SQLiteOpenHelper {
   private String sqlCreate = "CREATE TABLE ";
   private boolean createTableWithColumns;
   private Context context;
+  private XmlBuilder xmlBuilder = null;
 
   public SqliteManager(Context context, String name) {
     super(context, name, factory, version);
@@ -96,6 +108,224 @@ public class SqliteManager extends SQLiteOpenHelper {
     return rowUser;
   }
 
+  public File loadDatabaseAsJson(String tableName, SQLiteDatabase db){
+    File file = null;
+    String[] parts = tableName.split("-");
+    tableName = parts[0];
+    try {
+      xmlBuilder = new XmlBuilder();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    xmlBuilder.start(databaseName);
+
+    // get the tables
+    String sql = "select * from '"+ tableName +"'";
+    Cursor c = db.rawQuery(sql, new String[0]);
+
+    if (c.moveToFirst()) {
+
+      //while (c.moveToNext()) {
+     // String tableName ="dept";//c.getString(c.getColumnIndex("dep_id"));
+
+      // skip metadata, sequence, and uidx (unique indexes)
+      if (!tableName.equals("android_metadata") && !tableName.equals("sqlite_sequence")
+          && !tableName.startsWith("uidx")) {
+        try {
+          exportTable(tableName, db);
+        } catch (IOException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        }
+      }
+      // }
+    }
+    String xmlString = null;
+    try {
+      xmlString = xmlBuilder.end();
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    try {
+      String exportFileNamePrefix="dataXML";
+      file = writeToFile(xmlString, exportFileNamePrefix + ".xml");
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+
+
+  return file;
+  }
+
+
+
+  private void exportTable(final String tableName, SQLiteDatabase db) throws IOException {
+    xmlBuilder.openTable(tableName);
+    String sql = "select * from " + tableName;
+    Cursor c = db.rawQuery(sql, new String[0]);
+    if (c.moveToFirst()) {
+      int cols = c.getColumnCount();
+      do {
+        xmlBuilder.openRow();
+        for (int i = 0; i < cols; i++) {
+                /*if(i==6)
+                {
+                    //String id = c.getString( c.getColumnIndex("photo"));
+                    String str = new String(image);
+                    xmlBuilder.addColumn(c.getColumnName(i), str);
+                }*/
+          xmlBuilder.addColumn(c.getColumnName(i), c.getString(i));
+        }
+        xmlBuilder.closeRow();
+      } while (c.moveToNext());
+    }
+    c.close();
+    xmlBuilder.closeTable();
+  }
+
+  private File writeToFile(final String xmlString, final String exportFileName) throws IOException {
+   Log.v("FILEPATH",""+ context.getFilesDir());
+    File dir = new File(context.getFilesDir(), "DatabaseToXml");
+    if (!dir.exists()) {
+      dir.mkdirs();
+    }
+    File file = new File(dir, exportFileName);
+    file.createNewFile();
+
+    ByteBuffer buff = ByteBuffer.wrap(xmlString.getBytes());
+    FileChannel channel = new FileOutputStream(file).getChannel();
+    try {
+      channel.write(buff);
+    } finally {
+      if (channel != null) {
+        channel.close();
+      }
+    }
+    return file;
+  }
+
+  public void readFromFile(File file){
+
+    //Read text from file
+    StringBuilder text = new StringBuilder();
+
+    try {
+      BufferedReader br = new BufferedReader(new FileReader(file));
+      String line;
+
+      while ((line = br.readLine()) != null) {
+        text.append(line);
+        text.append('\n');
+      }
+      br.close();
+    }
+    catch (IOException e) {
+      //You'll need to add proper error handling here
+    }
+
+    Log.v("FILE",""+ text);
+  }
+  /**
+   * XmlBuilder is used to write XML tags (open and close, and a few attributes)
+   * to a StringBuilder. Here we have nothing to do with IO or SQL, just a fancy StringBuilder.
+   *
+   * @author ccollins
+   *
+   */
+  public static class XmlBuilder {
+    private static final String OPEN_XML_STANZA = "<?xml version=\"1.0\" encoding=\"utf-8\"?>";
+    private static final String CLOSE_WITH_TICK = "'>";
+    private static final String DB_OPEN = "<database name='";
+    private static final String DB_CLOSE = "</database>";
+    private static final String TABLE_OPEN = "<table name='";
+    private static final String TABLE_CLOSE = "</table>";
+    private static final String ROW_OPEN = "<row>";
+    private static final String ROW_CLOSE = "</row>";
+    private static final String COL_OPEN = "<col name='";
+    private static final String COL_CLOSE = "</col>";
+
+    private final StringBuilder sb;
+
+    public XmlBuilder() throws IOException {
+      sb = new StringBuilder();
+    }
+
+    void start(final String dbName) {
+      sb.append(XmlBuilder.OPEN_XML_STANZA);
+      sb.append(
+          XmlBuilder.DB_OPEN + dbName + XmlBuilder.CLOSE_WITH_TICK);
+    }
+
+    String end() throws IOException {
+      sb.append(XmlBuilder.DB_CLOSE);
+      return sb.toString();
+    }
+
+    void openTable(final String tableName) {
+      sb.append(
+         XmlBuilder.TABLE_OPEN + tableName + XmlBuilder.CLOSE_WITH_TICK);
+    }
+
+    void closeTable() {
+      sb.append(XmlBuilder.TABLE_CLOSE);
+    }
+
+    void openRow() {
+      sb.append(XmlBuilder.ROW_OPEN);
+    }
+
+    void closeRow() {
+      sb.append(XmlBuilder.ROW_CLOSE);
+    }
+
+    void addColumn(final String name, final String val) throws IOException {
+      sb.append(XmlBuilder.COL_OPEN + name + XmlBuilder.CLOSE_WITH_TICK + val + XmlBuilder.COL_CLOSE);
+    }
+  }
+
+  public <T extends Serializable> T loadObjectListDBTableMaster(SQLiteDatabase db, String tableName) {
+    Log.v("LOADOBJECTSERIALIZABLE",""+ tableName);
+    String[] parts = tableName.split("-");
+    tableName = parts[0];
+    T objectToReturn = null;
+
+    ArrayList<ModelObj> rowUser = new ArrayList<>();
+    int id = 1;
+    ArrayList<String> userList;
+
+    int columns = getTableColumnCount(db, tableName);
+
+    ModelObj obj;
+
+    Cursor cursorDB = db.rawQuery("SELECT * from " + tableName + "", null);
+    if (cursorDB.moveToFirst()) {
+      userList = new ArrayList<String>();
+      for (int i = 0; i < columns; i++) {
+        userList.add(cursorDB.getString(i));
+      }
+      obj = new ModelObj();
+      obj.setList(userList);
+      rowUser.add(obj);
+      id++;
+
+      while (cursorDB.moveToNext()) {
+        userList = new ArrayList<String>();
+        for (int i = 0; i < columns; i++) {
+          userList.add(cursorDB.getString(i));
+        }
+        obj = new ModelObj();
+        obj.setList(userList);
+        rowUser.add(obj);
+        id++;
+      }
+    }
+
+    objectToReturn = (T) rowUser;
+    return objectToReturn;
+  }
+
   public ArrayList<String> getTableList(SQLiteDatabase db) {
     ArrayList<String> tableNameList = new ArrayList<String>();
     String tableListStr = "SELECT name FROM sqlite_master;";
@@ -113,13 +343,16 @@ public class SqliteManager extends SQLiteOpenHelper {
   public boolean checkIfTableExist(SQLiteDatabase db, String tablename) {
 
     boolean tableExists = false;
-    String tableListStr =
+    String tableQuery =
         "SELECT name FROM sqlite_master WHERE type='table' AND name='" + tablename + "';";
-    Cursor cursor = db.rawQuery(tableListStr,null);
-    if (cursor.moveToFirst()) {
-      tableExists = true;
-      Log.v("TABLEEXIST", "TRUE" + tablename);
+    Cursor cursor = db.rawQuery(tableQuery,null);
+    if (cursor != null){
+      if (cursor.moveToFirst()) {
+        tableExists = true;
+        Log.v("TABLEEXIST", "TRUE" + tablename);
+      }
     }
+
     return tableExists;
   }
 

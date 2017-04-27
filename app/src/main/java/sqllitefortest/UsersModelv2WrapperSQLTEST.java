@@ -1,5 +1,6 @@
 package sqllitefortest;
 
+import com.gigigo.dbsqliteimpl.ModelObj;
 import com.wagnerandade.coollection.query.Query;
 import db.gigigo.com.dbmaster.masterclass.DBEngineMaster;
 import db.gigigo.com.dbmaster.masterclass.DBTableMaster;
@@ -18,6 +19,7 @@ public class UsersModelv2WrapperSQLTEST extends DBTableWrapperMaster {
   }
 
   ArrayList<UsersModelv2> mItems;
+  ArrayList<ModelObj> mItemsModelObj;
   //region asv new
 
 
@@ -30,6 +32,15 @@ public class UsersModelv2WrapperSQLTEST extends DBTableWrapperMaster {
 
     }
     return mItems;
+
+  }
+
+  public ArrayList<ModelObj> getItemsModelObj() {
+    if (mItemsModelObj == null) {
+      mItemsModelObj = (ArrayList<ModelObj>) load();
+
+    }
+    return mItemsModelObj;
   }
 
 

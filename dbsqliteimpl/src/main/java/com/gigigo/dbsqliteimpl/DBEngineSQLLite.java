@@ -13,9 +13,10 @@ import db.gigigo.com.dbmaster.schema.DBScheme;
 import db.gigigo.com.dbmaster.schema.DBSchemeItem;
 import db.gigigo.com.dbmaster.schema.DBTableFieldScheme;
 import db.gigigo.com.dbmaster.schema.DBTableScheme;
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by nubor on 03/03/2017.se
@@ -66,7 +67,7 @@ public class DBEngineSQLLite extends DBEngineMaster {
   }
 
   @Override public boolean isDBCreated(DBScheme dbMasterScheme) {
-    Log.v("DATABASENAME",""+ dbMasterScheme.getDbName() );
+    Log.v("DATABASENAME", "" + dbMasterScheme.getDbName());
     mSqliteManager = new SqliteManager(mContext, dbMasterScheme.getDbName());
     sqLiteDatabase = mSqliteManager.getWritableDatabase();
     return mSqliteManager.checkIfDatabaseExists(this.mContext, dbMasterScheme.getDbName());
@@ -177,7 +178,6 @@ public class DBEngineSQLLite extends DBEngineMaster {
 
     mSqliteManager.clearTableContent(sqLiteDatabase, tableAlias);
   }
-
 
   public void saveTable_OLD(DBTableWrapperMaster tableWrapper, String tableAlias) {
 
@@ -333,22 +333,20 @@ public class DBEngineSQLLite extends DBEngineMaster {
     ArrayList<Object> itemsForUpdateInSQL = tableWrapper.itemsForUpdate;
 
     for (Object item : itemsForInsertInSQL) {
-     // if(item instanceof DBTableMaster)
-      Log.v("INSERTITEM",""+ item.toString());
+      // if(item instanceof DBTableMaster)
+      Log.v("INSERTITEM", "" + item.toString());
       insertSQL(item, tableAlias);
     }
 
     for (Object item : itemsForUpdateInSQL) {
-     // if(item instanceof DBTableMaster)
-        updateSql(item, tableAlias);
+      // if(item instanceof DBTableMaster)
+      updateSql(item, tableAlias);
     }
 
     for (Object item : itemsForDeleteinSQL) {
-     // if(item instanceof DBTableMaster)
-        deleteSql(item, tableAlias);
+      // if(item instanceof DBTableMaster)
+      deleteSql(item, tableAlias);
     }
-
-
 
     //fixme asv, queda hacer la migracion, pero para ello debe funcionar
 
@@ -472,11 +470,11 @@ public class DBEngineSQLLite extends DBEngineMaster {
         if (field1.getType().isAssignableFrom(String.class)) {
           contentValues.remove(tableAlias);
         }
-      }catch (NoSuchFieldException e) {
+      } catch (NoSuchFieldException e) {
         e.printStackTrace();
       }
     }
-   // sqLiteDatabase.delete(tableAlias, dbTableFieldScheme.getNameField());
+    // sqLiteDatabase.delete(tableAlias, dbTableFieldScheme.getNameField());
   }
 
   private void insertSQL(Object dbTableMaster, String tableAlias) {
@@ -503,16 +501,34 @@ public class DBEngineSQLLite extends DBEngineMaster {
       }
     }
     sqLiteDatabase.insert(tableAlias, null, contentValues);
-
   }
 
   @Override public ArrayList<? extends DBTableMaster> loadItemsTable(String tableAlias) {
-    /*System.out.println("*****************loadItemsTable" + tableAlias);
-    ArrayList<? extends DBTableMaster> arrayList =
-        DataUtils.readSerializable(this.mContext, tableAlias);
+    System.out.println("*****************loadItemsTable" + tableAlias);
+/**
+ *
+ * Serializer serializer = new Persister();
+ File source = new File("example.xml");
+
+ Example example = serializer.read(Example.class, source);
+ *
+ * */
+
+    final File file1 = mSqliteManager.loadDatabaseAsJson(tableAlias, sqLiteDatabase);
+    mSqliteManager.readFromFile(file1);
+
+    String xml = "your xml string";
+    // todo serializar xml X-stream
+
+    ArrayList<? extends DBTableMaster> arrayList = mSqliteManager.loadObjectListDBTableMaster(sqLiteDatabase, tableAlias);
     if (arrayList == null) arrayList = new ArrayList<>();
-    return arrayList;*/
-    return new ArrayList<>();
+    return arrayList;
+
+
+
+    //mSqliteManager.readFromFile(file);
+
+    //return new ArrayList<>();
   }
 
   @Override public void clearTable(String tableAlias) {
@@ -531,8 +547,6 @@ public class DBEngineSQLLite extends DBEngineMaster {
     return myTableScheme;*/
     return new DBTableScheme("tabla");
   }
-
-
 
   /*ESTOS DOS METODOS DE MOMENTO NO SE UTILIZAN, el load no se si el esl get o q es*/
   @Override public void saveTableSchema(String tableAlias, String HashCodeDBFields) {

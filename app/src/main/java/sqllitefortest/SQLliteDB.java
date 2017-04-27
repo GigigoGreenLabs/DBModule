@@ -30,7 +30,7 @@ public class SQLliteDB extends DBMaster {
   public SQLliteDB(DBEngineMaster mDBEngine) {
     super(mDBEngine);
     DBScheme dbScheme = new DBScheme();
-    dbScheme.setDbName("MASMDASD");//asv revisar xq se inventa nombres el sqllite this.toString());
+    dbScheme.setDbName("Usuarios");//asv revisar xq se inventa nombres el sqllite this.toString());
     ArrayList<DBSchemeItem> lstDBSchemeItem = new ArrayList<>();
     if (!mDBEngine.isDBCreated(dbScheme)) {
       mDBEngine.createDB(dbScheme);
