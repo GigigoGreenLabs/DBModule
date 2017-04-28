@@ -35,6 +35,7 @@ public class GridActivity extends AppCompatActivity {
 
   private GridView grdOpciones;
 
+
   private SQLiteManager dbmanager;
   private SQLiteDatabase db;
   private String databaseName;

@@ -6,7 +6,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 import db.gigigo.com.dbmaster.masterclass.DBEngineMaster;
-import db.gigigo.com.dbmaster.masterclass.DBMapperMaster;
 import db.gigigo.com.dbmaster.masterclass.DBTableMaster;
 import db.gigigo.com.dbmaster.masterclass.DBTableWrapperMaster;
 import db.gigigo.com.dbmaster.schema.DBScheme;
@@ -14,9 +13,11 @@ import db.gigigo.com.dbmaster.schema.DBSchemeItem;
 import db.gigigo.com.dbmaster.schema.DBTableFieldScheme;
 import db.gigigo.com.dbmaster.schema.DBTableScheme;
 import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.XML;
 
 /**
  * Created by nubor on 03/03/2017.se
@@ -479,6 +480,7 @@ public class DBEngineSQLLite extends DBEngineMaster {
 
   private void insertSQL(Object dbTableMaster, String tableAlias) {
 
+
     final DBTableScheme dbTableScheme = loadTableSchema(tableAlias, "");
     ContentValues contentValues = new ContentValues();
     Class<?> clazz = dbTableMaster.getClass();
@@ -515,11 +517,18 @@ public class DBEngineSQLLite extends DBEngineMaster {
  * */
 
     final File file1 = mSqliteManager.loadDatabaseAsJson(tableAlias, sqLiteDatabase);
-    mSqliteManager.readFromFile(file1);
+    String xmlStrign = mSqliteManager.readFromFile(file1);
 
-    String xml = "your xml string";
+
+
     // todo serializar xml X-stream
-
+    try {
+      JSONObject xmlJSONObj = XML.toJSONObject(xmlStrign);
+      String jsonPrettyPrintString = xmlJSONObj.toString();
+      System.out.println(jsonPrettyPrintString);
+    } catch (JSONException je) {
+      System.out.println(je.toString());
+    }
     ArrayList<? extends DBTableMaster> arrayList = mSqliteManager.loadObjectListDBTableMaster(sqLiteDatabase, tableAlias);
     if (arrayList == null) arrayList = new ArrayList<>();
     return arrayList;
@@ -530,6 +539,7 @@ public class DBEngineSQLLite extends DBEngineMaster {
 
     //return new ArrayList<>();
   }
+
 
   @Override public void clearTable(String tableAlias) {
     //System.out.println("*****************clearTable" + tableAlias);
@@ -559,5 +569,7 @@ public class DBEngineSQLLite extends DBEngineMaster {
     //System.out.println("*****************loadTableSchema" + tableAlias + HashCodeDBFields);
     return DataUtils.readSerializable(mContext, strFileName);
   }
+
+
   //endregion
 }

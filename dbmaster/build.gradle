@@ -21,10 +21,11 @@ android {
     packagingOptions {
       exclude '../dbprocessor/build/libs/dbprocessor.jar'
     }
+
 }
 
 dependencies {
-  compile fileTree(dir: 'libs', include: ['*.jar'])
+  compile fileTree(include: ['*.jar'], dir: 'libs')
   testCompile 'junit:junit:4.12'
 }
 //asv this is the fuuuuuucking way, if we use cp or cmd in jitpack or whatver never works

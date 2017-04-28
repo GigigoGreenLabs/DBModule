@@ -5,18 +5,14 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.os.Environment;
 import android.util.Log;
 import android.widget.EditText;
 import android.widget.Toast;
-import db.gigigo.com.dbmaster.masterclass.DBTableMaster;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
@@ -206,26 +202,27 @@ public class SqliteManager extends SQLiteOpenHelper {
     return file;
   }
 
-  public void readFromFile(File file){
+  public String readFromFile(File file){
 
     //Read text from file
-    StringBuilder text = new StringBuilder();
+    StringBuilder textSB = new StringBuilder();
 
     try {
       BufferedReader br = new BufferedReader(new FileReader(file));
       String line;
 
       while ((line = br.readLine()) != null) {
-        text.append(line);
-        text.append('\n');
+        textSB.append(line);
+        textSB.append('\n');
       }
       br.close();
     }
     catch (IOException e) {
       //You'll need to add proper error handling here
     }
+    String textS = textSB.toString();
 
-    Log.v("FILE",""+ text);
+    return textS;
   }
   /**
    * XmlBuilder is used to write XML tags (open and close, and a few attributes)
