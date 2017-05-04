@@ -35,7 +35,7 @@ public class UsersModelv2WrapperSQLTEST extends DBTableWrapperMaster {
 
   }
 
-  public ArrayList<ModelObj> getItemsModelObj() {
+  public ArrayList<ModelObj>  getItemsModelObj() {
     if (mItemsModelObj == null) {
       mItemsModelObj = (ArrayList<ModelObj>) load();
 

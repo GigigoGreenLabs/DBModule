@@ -30,4 +30,5 @@ dependencies {
   compile project(':dbmaster')
   testCompile 'junit:junit:4.12'
   compile files('libs/java-json.jar')
+  compile 'com.google.code.gson:gson:2.8.0'
 }

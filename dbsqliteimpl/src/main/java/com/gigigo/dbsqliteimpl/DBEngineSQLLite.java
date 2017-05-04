@@ -5,6 +5,10 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import db.gigigo.com.dbmaster.masterclass.DBEngineMaster;
 import db.gigigo.com.dbmaster.masterclass.DBTableMaster;
 import db.gigigo.com.dbmaster.masterclass.DBTableWrapperMaster;
@@ -13,6 +17,8 @@ import db.gigigo.com.dbmaster.schema.DBSchemeItem;
 import db.gigigo.com.dbmaster.schema.DBTableFieldScheme;
 import db.gigigo.com.dbmaster.schema.DBTableScheme;
 import java.io.File;
+import java.io.Reader;
+import java.io.StringReader;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import org.json.JSONException;
@@ -480,7 +486,6 @@ public class DBEngineSQLLite extends DBEngineMaster {
 
   private void insertSQL(Object dbTableMaster, String tableAlias) {
 
-
     final DBTableScheme dbTableScheme = loadTableSchema(tableAlias, "");
     ContentValues contentValues = new ContentValues();
     Class<?> clazz = dbTableMaster.getClass();
@@ -507,39 +512,54 @@ public class DBEngineSQLLite extends DBEngineMaster {
 
   @Override public ArrayList<? extends DBTableMaster> loadItemsTable(String tableAlias) {
     System.out.println("*****************loadItemsTable" + tableAlias);
-/**
- *
- * Serializer serializer = new Persister();
- File source = new File("example.xml");
 
- Example example = serializer.read(Example.class, source);
- *
- * */
 
-    final File file1 = mSqliteManager.loadDatabaseAsJson(tableAlias, sqLiteDatabase);
+    final File file1 = mSqliteManager.loadDatabaseAsXml(tableAlias, sqLiteDatabase);
     String xmlStrign = mSqliteManager.readFromFile(file1);
 
 
 
-    // todo serializar xml X-stream
+
+    // todo serializar xml
     try {
-      JSONObject xmlJSONObj = XML.toJSONObject(xmlStrign);
-      String jsonPrettyPrintString = xmlJSONObj.toString();
+      JSONObject jsonObject = XML.toJSONObject(xmlStrign);
+
+      JSONObject arrayUsers = jsonObject;//jsonObject.getJSONObject("col");
+
+      Reader reader = new StringReader(arrayUsers.toString());
+      JsonElement elem = new JsonParser().parse(reader);
+      Gson gson =new GsonBuilder().create();
+      Object o = gson.fromJson(elem, Object.class);
+      ArrayList<? extends DBTableMaster>  arrayListTest  =(ArrayList<? extends DBTableMaster>)o;
+      System.out.println(o);
+     /* try {
+        FileInputStream fileInputStream = context.openFileInput(fileName);
+        ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream())
+        objectToReturn = (T) objectInputStream.readObject();
+
+        objectInputStream.close();
+        fileInputStream.close();
+      } catch (IOException | ClassNotFoundException e) {
+        e.printStackTrace();
+      }
+
+
+*/
+          String jsonPrettyPrintString = jsonObject.toString();
       System.out.println(jsonPrettyPrintString);
     } catch (JSONException je) {
       System.out.println(je.toString());
     }
-    ArrayList<? extends DBTableMaster> arrayList = mSqliteManager.loadObjectListDBTableMaster(sqLiteDatabase, tableAlias);
+
+    ArrayList<? extends DBTableMaster> arrayList =
+        mSqliteManager.loadObjectListDBTableMaster(sqLiteDatabase, tableAlias);
     if (arrayList == null) arrayList = new ArrayList<>();
     return arrayList;
-
-
 
     //mSqliteManager.readFromFile(file);
 
     //return new ArrayList<>();
   }
-
 
   @Override public void clearTable(String tableAlias) {
     //System.out.println("*****************clearTable" + tableAlias);
@@ -569,7 +589,6 @@ public class DBEngineSQLLite extends DBEngineMaster {
     //System.out.println("*****************loadTableSchema" + tableAlias + HashCodeDBFields);
     return DataUtils.readSerializable(mContext, strFileName);
   }
-
 
   //endregion
 }

@@ -1,17 +1,15 @@
 package com.gigigo.dbsqliteimpl;
 
-import com.gigigo.aprocesor.annotations.DataField;
-import com.gigigo.aprocesor.annotations.DataTable;
 import db.gigigo.com.dbmaster.masterclass.DBTableMaster;
-import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 
 public class ModelObj extends DBTableMaster {
 
-  private ArrayList<String> list;
+  private List<String> list;
 
   public ArrayList<String> getList() {
-    return list;
+    return (ArrayList<String>) list;
   }
 
   public void setList(ArrayList<String> list) {

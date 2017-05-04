@@ -3,25 +3,25 @@ package db.gigigo.com.dbmodule;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import com.gigigo.dbsqliteimpl.DBEngineSQLLite;
-import com.gigigo.dbsqliteimpl.ModelObj;
 import com.gigigo.dbsqliteimpl.SqliteManager;
-import com.gigigo.gigigocrud_sqliteandroid.Manager.SQLiteManager;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import db.gigigo.com.dbmaster.masterclass.DBEngineMaster;
 import db.gigigo.com.dbmaster.masterclass.DBMapperMaster;
 import db.gigigo.com.dbmaster.masterclass.DBSaveLoadCallback;
+import db.gigigo.com.dbmaster.masterclass.DBTableMaster;
+import db.gigigo.com.dbmaster.schema.DBScheme;
 import db.gigigo.com.dbmodule.dbsample.DataGenerator;
 import db.gigigo.com.dbmodule.dbsample.NewTestModel;
-import java.io.File;
-import sqllitefortest.SQLliteDB;
 import db.gigigo.com.dbmodule.dbsample.UsersModel;
-
 import db.gigigo.com.dbmodule.dbsample.UsersModelv2;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+import sqllitefortest.SQLliteDB;
 
 import static com.wagnerandade.coollection.Coollection.eq;
 
@@ -29,14 +29,15 @@ public class MainActivity extends AppCompatActivity {
   public static SQLliteDB mMyDataBase;//asv this maybe in the application
   UsersModelv2 lastUsersModel;
   NewTestModel lastNewTestModel;
+  Class className = null;
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
 
     initDB();
-   // mMyDataBase.Usuarios().addItem(new UsersModelv2("Pepe","Monder","4"));
-   // mMyDataBase.Usuarios().save();
+    // mMyDataBase.Usuarios().addItem(new UsersModelv2("Pepe","Monder","4"));
+    // mMyDataBase.Usuarios().save();
 
     //createSampleDB();
 
@@ -48,15 +49,13 @@ public class MainActivity extends AppCompatActivity {
         ArrayList<UsersModelv2> lst20 = new ArrayList<UsersModelv2>();
         for (int i = 0; i < 5; i++) {
 
-          lastUsersModel = new UsersModelv2(DataGenerator.getRandomName() + "SQL"+i,
-              DataGenerator.getRandomSurName() + "SQL"+i, System.currentTimeMillis() + "");
+          lastUsersModel = new UsersModelv2(DataGenerator.getRandomName() + "SQL" + i,
+              DataGenerator.getRandomSurName() + "SQL" + i, System.currentTimeMillis() + "");
           lst20.add(lastUsersModel);
           mMyDataBase.Usuarios().addItem(lastUsersModel);
-
-
         }
 
-       // mMyDataBase.Usuarios().setItems(lst20);
+        // mMyDataBase.Usuarios().setItems(lst20);
         mMyDataBase.Usuarios().save();
       }
     });
@@ -64,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
     Button btnDel = (Button) findViewById(R.id.btnDel);
     btnDel.setOnClickListener(new View.OnClickListener() {
       @Override public void onClick(View view) {
-        if(lastUsersModel!=null) {
+        if (lastUsersModel != null) {
           mMyDataBase.Usuarios().delItem(lastUsersModel);
           mMyDataBase.Usuarios().save();
         }
@@ -74,18 +73,67 @@ public class MainActivity extends AppCompatActivity {
     Button btnList = (Button) findViewById(R.id.btnList);
     btnList.setOnClickListener(new View.OnClickListener() {
       @Override public void onClick(View view) {
+        Gson gson = new Gson();
 
-    /*    SqliteManager dbmanager = new SqliteManager(getApplicationContext(), "Usuarios");
-
+        SqliteManager dbmanager = new SqliteManager(getApplicationContext(), "Usuarios");
         SQLiteDatabase db = dbmanager.getWritableDatabase();
-        File file = dbmanager.loadDatabaseAsJson("Usuarios",db);
-        dbmanager.readFromFile(file);*/
+
+        String jsonStrign = dbmanager.loadDatabaseAsJson("Usuarios", db);
+        //jsonStrign = "{"+jsonStrign + "}";
+        System.out.println(jsonStrign);
+
+        // ArrayList<T> myArray= gson.fromJson(jsonStrign,T);
+
+        UsersModelv2[] darray = gson.fromJson(jsonStrign, UsersModelv2[].class);
+
+        //ArrayList<Object>  array = gson.fromJson(jsonStrign,ArrayList.class);
+        ArrayList<UsersModelv2> myArray = new ArrayList<UsersModelv2>();
+        for (int i = 0; i < darray.length; i++) {
+          myArray.add((UsersModelv2) darray[i]);
+        }
+
+        String tableAlias = "Usuarios";
+        DBScheme dbScheme = mMyDataBase.Usuarios().mDBEngine.loadDBScheme();
+
+        for (int i = 0; i < dbScheme.getLstSchemaItems().size(); i++) {
+          System.out.println("Model Class" + dbScheme.getLstSchemaItems().get(i).getModelClass());
+          if (tableAlias.equals(dbScheme.getLstSchemaItems().get(i).getTableAlias())) {
+            System.out.println(
+                "FIESTA DE LA KREBADA MODEL ENCONTRADO" + dbScheme.getLstSchemaItems().get(i).getModelClass());
+            try {
+              className =Class.forName("db.gigigo.com.dbmodule.dbsample."+dbScheme.getLstSchemaItems().get(i).getModelClass());
+            } catch (ClassNotFoundException e) {
+              e.printStackTrace();
+            }
+          }
+        }
+
+   /*     //A
+        Type listType = new TypeToken<ArrayList<UsersModelv2>>() {
+        }.getType();
+        List<UsersModelv2> list = new Gson().fromJson(jsonStrign, listType);
+*/
+
+        //B
+
+        Type listType2 = new TypeToken<ArrayList<UsersModelv2>>() {
+        }.getType();
+
+        List<? extends DBTableMaster> list2 = new Gson().fromJson(jsonStrign, listType2);
+
+        int i = 1;
+
+
+
+        /*
+          File file = dbmanager.loadDatabaseAsXml("Usuarios",db);
+          dbmanager.readFromFile(file);
 
         //NEW USERMODEL SQLLITE-NOT-VALID
 
-        /*ArrayList<ModelObj> items = mMyDataBase.Usuarios().getItemsModelObj();
+        ArrayList<ModelObj> items = mMyDataBase.Usuarios().getItemsModelObj();
 
-        ArrayList<String> itemsStrings = new ArrayList<String>();
+        ArrayList<String> itemsStrings;
 
         for (ModelObj item : items) {
           itemsStrings = item.getList();
@@ -97,19 +145,20 @@ public class MainActivity extends AppCompatActivity {
 
         }*/
 
-
         //OLD USERMODEL JSON-VALID
 
-       /* for (UsersModelv2 item : mMyDataBase.Usuarios().getItems()) {
+     /*   for (UsersModelv2 item : mMyDataBase.Usuarios().getItems()) {
           System.out.println("Name: "
               + item.getName()
               + " SurName: "
               + item.getSurname()
               + " hashcode: "
               + item.hashCode());
-        }*/
+        }
 
-        //System.out.println("TOTAL: " + mMyDataBase.Usuarios().getItemsModelObj().size());
+        System.out.println("TOTAL: " + mMyDataBase.Usuarios().getItemsModelObj().size());
+        */
+
       }
     });
 
@@ -117,22 +166,18 @@ public class MainActivity extends AppCompatActivity {
     btnQuery.setOnClickListener(new View.OnClickListener() {
       @Override public void onClick(View view) {
 
+        List<UsersModelv2> all =
+            mMyDataBase.Usuarios().FROM().where("Name", eq("Pepito")).orderBy("Surname").all();
 
-          List<UsersModelv2> all =
-              mMyDataBase.Usuarios().FROM().where("Name", eq("Pepito")).orderBy("Surname").all();
-
-          for (UsersModelv2 item : all) {
-            System.out.println("Name: "
-                + item.getName()
-                + " SurName: "
-                + item.getSurname()
-                + " hashcode: "
-                + item.hashCode());
-          }
-          System.out.println("TOTAL pepitos: " + all.size());
-
-
-
+        for (UsersModelv2 item : all) {
+          System.out.println("Name: "
+              + item.getName()
+              + " SurName: "
+              + item.getSurname()
+              + " hashcode: "
+              + item.hashCode());
+        }
+        System.out.println("TOTAL pepitos: " + all.size());
       }
     });
     Button btnUpdate = (Button) findViewById(R.id.btnUpdate);
@@ -142,7 +187,7 @@ public class MainActivity extends AppCompatActivity {
         List<UsersModelv2> all = mMyDataBase.Usuarios()
             .FROM()
             .where("getName", eq("Alberto"))
-            .and("SurName",eq("Sainz"))
+            .and("SurName", eq("Sainz"))
             .orderBy("getSurname")
             .all();
         if (all.size() > 0) {
@@ -166,40 +211,33 @@ public class MainActivity extends AppCompatActivity {
 
     // mMyDataBase.Usuarios().createFrom(mMyDataBase.Usuarios())
 
-
     Button btnSqlAdmin = (Button) findViewById(R.id.btnsqladmin);
     btnSqlAdmin.setOnClickListener(new View.OnClickListener() {
       @Override public void onClick(View view) {
         com.gigigo.gigigocrud_sqliteandroid.MainActivity.open(MainActivity.this);
-
       }
     });
   }
 
   private void createSampleDB() {
-   SqliteManager sql = new SqliteManager(getApplicationContext(), "Usuarios");
+    SqliteManager sql = new SqliteManager(getApplicationContext(), "Usuarios");
     SQLiteDatabase db = sql.getWritableDatabase();
     String sqlCreate = "CREATE TABLE Usuarios (codigo INTEGER, nombre TEXT)";
     db.execSQL(sqlCreate);
 
-    if(db != null)
-    {
+    if (db != null) {
 
-      for(int i=1; i<=5; i++)
-      {
+      for (int i = 1; i <= 5; i++) {
 
         int codigo = i;
         String nombre = "DBModule" + i;
 
-        db.execSQL("INSERT INTO Usuarios (codigo, nombre) " +
-            "VALUES (" + codigo + ", '" + nombre +"')");
+        db.execSQL(
+            "INSERT INTO Usuarios (codigo, nombre) " + "VALUES (" + codigo + ", '" + nombre + "')");
       }
-
 
       db.close();
     }
-
-
   }
 
   long timeFirst = 0;

@@ -3,9 +3,7 @@ package db.gigigo.com.dbmaster.masterclass;
 import android.content.Context;
 import db.gigigo.com.dbmaster.schema.DBScheme;
 import db.gigigo.com.dbmaster.schema.DBTableScheme;
-import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by nubor on 03/03/2017.
@@ -68,4 +66,6 @@ public abstract class DBEngineMaster {
   public ArrayList<DBMapperMaster> getMigrationMappers() {
     return mapperMasters;
   }
+
+
 }

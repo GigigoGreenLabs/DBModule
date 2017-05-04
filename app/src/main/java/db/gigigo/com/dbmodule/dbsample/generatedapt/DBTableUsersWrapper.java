@@ -6,9 +6,8 @@ import db.gigigo.com.dbmaster.masterclass.DBTableMaster;
 import db.gigigo.com.dbmaster.masterclass.DBTableWrapperMaster;
 import db.gigigo.com.dbmodule.dbsample.UsersModel;
 import java.util.ArrayList;
-import java.util.List;
 
-import static com.wagnerandade.coollection.Coollection.*;
+import static com.wagnerandade.coollection.Coollection.from;
 
 /**
  * Created by nubor on 06/03/2017.
@@ -26,6 +25,8 @@ public class DBTableUsersWrapper extends DBTableWrapperMaster {
     }
     return mItems;
   }
+
+
 
   @Override public void setItems(ArrayList<? extends DBTableMaster> items) {
     if (!items.isEmpty() && items.get(0) instanceof UsersModel) {

@@ -8,6 +8,8 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 import android.widget.EditText;
 import android.widget.Toast;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -17,6 +19,7 @@ import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -104,7 +107,8 @@ public class SqliteManager extends SQLiteOpenHelper {
     return rowUser;
   }
 
-  public File loadDatabaseAsJson(String tableName, SQLiteDatabase db){
+
+  public File loadDatabaseAsXml(String tableName, SQLiteDatabase db){
     File file = null;
     String[] parts = tableName.split("-");
     tableName = parts[0];
@@ -138,7 +142,7 @@ public class SqliteManager extends SQLiteOpenHelper {
     }
     String xmlString = null;
     try {
-      xmlString = xmlBuilder.end();
+      xmlString = xmlBuilder.end(databaseName);
     } catch (IOException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -155,6 +159,41 @@ public class SqliteManager extends SQLiteOpenHelper {
   return file;
   }
 
+  public String loadDatabaseAsJson(String tableName, SQLiteDatabase db){
+
+
+    Gson gson = new GsonBuilder().create();
+
+
+    ArrayList<HashMap<String, Object>> offlineList;
+    offlineList = new ArrayList<HashMap<String, Object>>();
+    String sql = "select * from '"+ tableName +"'";
+
+    Cursor cursor = db.rawQuery(sql, null);
+
+    if (cursor.moveToFirst()) {
+      do {
+       
+        HashMap<String, Object> map = new HashMap<String, Object>();
+
+        for (int i = 0; i < cursor.getColumnCount(); i++) {
+          map.put( cursor.getColumnName(i),cursor.getString(i));
+        }
+
+
+        offlineList.add(map);
+
+      } while (cursor.moveToNext());
+    }
+    db.close();
+
+
+
+    //Use GSON to serialize Array List to JSON
+
+    return gson.toJson(offlineList);
+  }
+
 
 
   private void exportTable(final String tableName, SQLiteDatabase db) throws IOException {
@@ -164,7 +203,6 @@ public class SqliteManager extends SQLiteOpenHelper {
     if (c.moveToFirst()) {
       int cols = c.getColumnCount();
       do {
-        xmlBuilder.openRow();
         for (int i = 0; i < cols; i++) {
                 /*if(i==6)
                 {
@@ -174,11 +212,10 @@ public class SqliteManager extends SQLiteOpenHelper {
                 }*/
           xmlBuilder.addColumn(c.getColumnName(i), c.getString(i));
         }
-        xmlBuilder.closeRow();
       } while (c.moveToNext());
     }
     c.close();
-    xmlBuilder.closeTable();
+    xmlBuilder.closeTable(tableName);
   }
 
   private File writeToFile(final String xmlString, final String exportFileName) throws IOException {
@@ -224,6 +261,9 @@ public class SqliteManager extends SQLiteOpenHelper {
 
     return textS;
   }
+
+
+
   /**
    * XmlBuilder is used to write XML tags (open and close, and a few attributes)
    * to a StringBuilder. Here we have nothing to do with IO or SQL, just a fancy StringBuilder.
@@ -232,16 +272,13 @@ public class SqliteManager extends SQLiteOpenHelper {
    *
    */
   public static class XmlBuilder {
+
     private static final String OPEN_XML_STANZA = "<?xml version=\"1.0\" encoding=\"utf-8\"?>";
-    private static final String CLOSE_WITH_TICK = "'>";
-    private static final String DB_OPEN = "<database name='";
-    private static final String DB_CLOSE = "</database>";
-    private static final String TABLE_OPEN = "<table name='";
-    private static final String TABLE_CLOSE = "</table>";
-    private static final String ROW_OPEN = "<row>";
-    private static final String ROW_CLOSE = "</row>";
-    private static final String COL_OPEN = "<col name='";
-    private static final String COL_CLOSE = "</col>";
+    private static final String CLOSE_WITH_TICK = ">";
+    private static final String OPEN_WITH_TICK = "<";
+    private static final String OPEN_WITH_CLOSED_TICK = "</";
+
+
 
     private final StringBuilder sb;
 
@@ -252,34 +289,27 @@ public class SqliteManager extends SQLiteOpenHelper {
     void start(final String dbName) {
       sb.append(XmlBuilder.OPEN_XML_STANZA);
       sb.append(
-          XmlBuilder.DB_OPEN + dbName + XmlBuilder.CLOSE_WITH_TICK);
+          XmlBuilder.OPEN_WITH_TICK+ dbName + XmlBuilder.CLOSE_WITH_TICK);
     }
 
-    String end() throws IOException {
-      sb.append(XmlBuilder.DB_CLOSE);
+    String end(String databaseName) throws IOException {
+      sb.append(XmlBuilder.OPEN_WITH_CLOSED_TICK + "DATABASE" + XmlBuilder.CLOSE_WITH_TICK);
       return sb.toString();
     }
 
     void openTable(final String tableName) {
       sb.append(
-         XmlBuilder.TABLE_OPEN + tableName + XmlBuilder.CLOSE_WITH_TICK);
+          XmlBuilder.OPEN_WITH_TICK + tableName + XmlBuilder.CLOSE_WITH_TICK);
     }
 
-    void closeTable() {
-      sb.append(XmlBuilder.TABLE_CLOSE);
-    }
-
-    void openRow() {
-      sb.append(XmlBuilder.ROW_OPEN);
-    }
-
-    void closeRow() {
-      sb.append(XmlBuilder.ROW_CLOSE);
+    void closeTable(String tableName) {
+      sb.append(XmlBuilder.OPEN_WITH_CLOSED_TICK + tableName + XmlBuilder.CLOSE_WITH_TICK);
     }
 
     void addColumn(final String name, final String val) throws IOException {
-      sb.append(XmlBuilder.COL_OPEN + name + XmlBuilder.CLOSE_WITH_TICK + val + XmlBuilder.COL_CLOSE);
+      sb.append(XmlBuilder.OPEN_WITH_CLOSED_TICK + val + XmlBuilder.CLOSE_WITH_TICK);
     }
+
   }
 
   public <T extends Serializable> T loadObjectListDBTableMaster(SQLiteDatabase db, String tableName) {

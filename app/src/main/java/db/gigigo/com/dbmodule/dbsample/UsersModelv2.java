@@ -10,8 +10,8 @@ import java.util.Objects;
 /**
  * Created by nubor on 14/03/2017.
  */
-@DataTable(alias = "Usuarios", isOnlyOneRecord = false) public class UsersModelv2
-    extends DBTableMaster {
+@DataTable(alias = "Usuarios", isOnlyOneRecord = false)
+public class UsersModelv2    extends DBTableMaster {
   public @DataField String Name;
   public @DataField String Surname;
   public @DataField String Age;
