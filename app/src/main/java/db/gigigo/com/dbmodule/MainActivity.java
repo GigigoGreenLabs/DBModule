@@ -8,7 +8,6 @@ import android.widget.Button;
 import com.gigigo.dbsqliteimpl.DBEngineSQLLite;
 import com.gigigo.dbsqliteimpl.SqliteManager;
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import db.gigigo.com.dbmaster.masterclass.DBEngineMaster;
 import db.gigigo.com.dbmaster.masterclass.DBMapperMaster;
 import db.gigigo.com.dbmaster.masterclass.DBSaveLoadCallback;
@@ -18,6 +17,7 @@ import db.gigigo.com.dbmodule.dbsample.DataGenerator;
 import db.gigigo.com.dbmodule.dbsample.NewTestModel;
 import db.gigigo.com.dbmodule.dbsample.UsersModel;
 import db.gigigo.com.dbmodule.dbsample.UsersModelv2;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
   NewTestModel lastNewTestModel;
   Class className = null;
 
-  @Override protected void onCreate(Bundle savedInstanceState) {
+  @Override protected void onCreate(final Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
 
@@ -64,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
     btnDel.setOnClickListener(new View.OnClickListener() {
       @Override public void onClick(View view) {
         if (lastUsersModel != null) {
+          System.out.println("class+aaa"+lastUsersModel.getClass());
           mMyDataBase.Usuarios().delItem(lastUsersModel);
           mMyDataBase.Usuarios().save();
         }
@@ -96,10 +97,12 @@ public class MainActivity extends AppCompatActivity {
         DBScheme dbScheme = mMyDataBase.Usuarios().mDBEngine.loadDBScheme();
 
         for (int i = 0; i < dbScheme.getLstSchemaItems().size(); i++) {
+          /*
           System.out.println("Model Class" + dbScheme.getLstSchemaItems().get(i).getModelClass());
+          */
           if (tableAlias.equals(dbScheme.getLstSchemaItems().get(i).getTableAlias())) {
-            System.out.println(
-                "FIESTA DE LA KREBADA MODEL ENCONTRADO" + dbScheme.getLstSchemaItems().get(i).getModelClass());
+            /*System.out.println(
+                "FIESTA DE LA KREBADA MODEL ENCONTRADO" + dbScheme.getLstSchemaItems().get(i).getModelClass());*/
             try {
               className =Class.forName("db.gigigo.com.dbmodule.dbsample."+dbScheme.getLstSchemaItems().get(i).getModelClass());
             } catch (ClassNotFoundException e) {
@@ -114,14 +117,29 @@ public class MainActivity extends AppCompatActivity {
         List<UsersModelv2> list = new Gson().fromJson(jsonStrign, listType);
 */
 
+
+
+
+
         //B
-
-        Type listType2 = new TypeToken<ArrayList<UsersModelv2>>() {
+ /*       Type listType2 = new TypeToken<ArrayList<UsersModelv2>>() {
         }.getType();
-
         List<? extends DBTableMaster> list2 = new Gson().fromJson(jsonStrign, listType2);
 
-        int i = 1;
+        for (DBTableMaster dbTableMaster : list2) {
+          System.out.println("--------------"+dbTableMaster);
+        }*/
+
+
+
+        //C
+        Type  type = new ListParametizedType(className);
+        List<? extends DBTableMaster> list  = gson.fromJson(jsonStrign, type);
+
+        for (DBTableMaster dbTableMaster : list) {
+          System.out.println(dbTableMaster.toString());
+        }
+        System.out.println("NºUsuarios: "+list.size());
 
 
 
@@ -278,5 +296,26 @@ public class MainActivity extends AppCompatActivity {
     bdEngine.setMigrationMappers(myMapper);
     mMyDataBase = new SQLliteDB(bdEngine);
     //mMyDataBase.migrateDB(); //FOR EXECUTE MIGRATION
+  }
+
+  private static class ListParametizedType implements ParameterizedType{
+
+    private Type type;
+
+    public ListParametizedType(Type type) {
+      this.type = type;
+    }
+
+    @Override public Type[] getActualTypeArguments() {
+      return new Type[]{type};
+    }
+
+    @Override public Type getRawType() {
+      return ArrayList.class;
+    }
+
+    @Override public Type getOwnerType() {
+      return null;
+    }
   }
 }

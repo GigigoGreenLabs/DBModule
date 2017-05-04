@@ -5,10 +5,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
 import db.gigigo.com.dbmaster.masterclass.DBEngineMaster;
 import db.gigigo.com.dbmaster.masterclass.DBTableMaster;
 import db.gigigo.com.dbmaster.masterclass.DBTableWrapperMaster;
@@ -17,13 +13,8 @@ import db.gigigo.com.dbmaster.schema.DBSchemeItem;
 import db.gigigo.com.dbmaster.schema.DBTableFieldScheme;
 import db.gigigo.com.dbmaster.schema.DBTableScheme;
 import java.io.File;
-import java.io.Reader;
-import java.io.StringReader;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.XML;
 
 /**
  * Created by nubor on 03/03/2017.se
@@ -56,8 +47,8 @@ public class DBEngineSQLLite extends DBEngineMaster {
 
    return DataUtils.readSerializable(this.mContext,  strFileName);*/
 
-    ArrayList<String> tableNameList = new ArrayList<String>();
-    ArrayList<DBSchemeItem> columnList = new ArrayList<DBSchemeItem>();
+    ArrayList<String> tableNameList;
+    ArrayList<DBSchemeItem> columnList = new ArrayList<>();
 
     DBScheme db = new DBScheme();
     db.setDbName(SCHEME_DB_FILE_NAME);
@@ -65,7 +56,7 @@ public class DBEngineSQLLite extends DBEngineMaster {
     tableNameList = mSqliteManager.getTableList(sqLiteDatabase);
     DBSchemeItem dbSchemeItemAux;
     for (String tableName : tableNameList) {
-      dbSchemeItemAux = new DBSchemeItem(tableName, "", "", System.currentTimeMillis());
+      dbSchemeItemAux = new DBSchemeItem(tableName, "","", System.currentTimeMillis());
       columnList.add(dbSchemeItemAux);
     }
     db.setLstSchemaItems(columnList);
@@ -132,7 +123,6 @@ public class DBEngineSQLLite extends DBEngineMaster {
       Log.v("STRING", "" + createTableStr);
       sqLiteDatabase.execSQL(createTableStr);
     }
-    //todo ejecutar la senctencia SQL de create table en la   SQLiteDatabase sqLiteDatabase;
   }
 
   @Override public void createDBTableScheme(DBTableScheme dbScheme) {
@@ -167,22 +157,6 @@ public class DBEngineSQLLite extends DBEngineMaster {
   }
 
   @Override public void clearDBTable(String tableAlias) {
-    /*System.out.println("*****************clearDBTable" + tableAlias);
-    //this must be delete all items  DBTable  with the name alias, and all the hashcodeDBFields
-    DBScheme dbScheme = DataUtils.readSerializable(this.mContext, SCHEME_DB_FILE_NAME);
-    ArrayList<DBSchemeItem> newSchemaItems = new ArrayList<>();
-
-    for (DBSchemeItem item : dbScheme.getLstSchemaItems()) {
-      if (item.getTableAlias().equals(tableAlias)) {//delete all versions of this tablealias
-        DataUtils.removeSerializable(this.mContext,
-            item.getTableAlias() + item.getHashCodeTableFields());
-      } else {
-        newSchemaItems.add(item);
-      }
-    }
-    dbScheme.setLstSchemaItems(newSchemaItems);
-    DataUtils.saveSerializable(this.mContext, dbScheme, SCHEME_DB_FILE_NAME);*/
-
     mSqliteManager.clearTableContent(sqLiteDatabase, tableAlias);
   }
 
@@ -513,14 +487,10 @@ public class DBEngineSQLLite extends DBEngineMaster {
   @Override public ArrayList<? extends DBTableMaster> loadItemsTable(String tableAlias) {
     System.out.println("*****************loadItemsTable" + tableAlias);
 
-
     final File file1 = mSqliteManager.loadDatabaseAsXml(tableAlias, sqLiteDatabase);
     String xmlStrign = mSqliteManager.readFromFile(file1);
 
-
-
-
-    // todo serializar xml
+   /* // todo serializar xml
     try {
       JSONObject jsonObject = XML.toJSONObject(xmlStrign);
 
@@ -528,28 +498,15 @@ public class DBEngineSQLLite extends DBEngineMaster {
 
       Reader reader = new StringReader(arrayUsers.toString());
       JsonElement elem = new JsonParser().parse(reader);
-      Gson gson =new GsonBuilder().create();
+      Gson gson = new GsonBuilder().create();
       Object o = gson.fromJson(elem, Object.class);
-      ArrayList<? extends DBTableMaster>  arrayListTest  =(ArrayList<? extends DBTableMaster>)o;
-      System.out.println(o);
-     /* try {
-        FileInputStream fileInputStream = context.openFileInput(fileName);
-        ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream())
-        objectToReturn = (T) objectInputStream.readObject();
-
-        objectInputStream.close();
-        fileInputStream.close();
-      } catch (IOException | ClassNotFoundException e) {
-        e.printStackTrace();
-      }
-
-
-*/
-          String jsonPrettyPrintString = jsonObject.toString();
+      ArrayList<? extends DBTableMaster> arrayListTest = (ArrayList<? extends DBTableMaster>) o;
+      System.out.println("ooooooooo" + o);
+      String jsonPrettyPrintString = jsonObject.toString();
       System.out.println(jsonPrettyPrintString);
     } catch (JSONException je) {
       System.out.println(je.toString());
-    }
+    }*/
 
     ArrayList<? extends DBTableMaster> arrayList =
         mSqliteManager.loadObjectListDBTableMaster(sqLiteDatabase, tableAlias);

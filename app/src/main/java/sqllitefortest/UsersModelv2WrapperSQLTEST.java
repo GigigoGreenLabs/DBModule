@@ -10,8 +10,6 @@ import java.util.ArrayList;
 
 import static com.wagnerandade.coollection.Coollection.from;
 
-
-
 public class UsersModelv2WrapperSQLTEST extends DBTableWrapperMaster {
 
   public UsersModelv2WrapperSQLTEST(UsersModelv2 table, DBEngineMaster engineMaster, String alias) {
@@ -22,27 +20,20 @@ public class UsersModelv2WrapperSQLTEST extends DBTableWrapperMaster {
   ArrayList<ModelObj> mItemsModelObj;
   //region asv new
 
-
-
-
   //endregion
   @Override public ArrayList<UsersModelv2> getItems() {
     if (mItems == null) {
       mItems = (ArrayList<UsersModelv2>) load();
-
     }
     return mItems;
-
   }
 
-  public ArrayList<ModelObj>  getItemsModelObj() {
+  public ArrayList<ModelObj> getItemsModelObj() {
     if (mItemsModelObj == null) {
       mItemsModelObj = (ArrayList<ModelObj>) load();
-
     }
     return mItemsModelObj;
   }
-
 
   //region revisar uso de las colecciones
 
@@ -63,9 +54,8 @@ public class UsersModelv2WrapperSQLTEST extends DBTableWrapperMaster {
   public void mySetItems(ArrayList<UsersModelv2> items) {
     itemsForDelete.addAll((ArrayList<UsersModelv2>) this.getItems());//asv
     mItems = (ArrayList<UsersModelv2>) items;
-    itemsForInsert.addAll((ArrayList<UsersModelv2>)items);//asv
+    itemsForInsert.addAll((ArrayList<UsersModelv2>) items);//asv
     save();
-
   }
   //endregion
 
@@ -82,7 +72,6 @@ public class UsersModelv2WrapperSQLTEST extends DBTableWrapperMaster {
   @Override public void setItem(DBTableMaster item) {
     int idx = findIndex(item);
     setItem(item, idx);
-
   }
 
   //endregion
@@ -92,7 +81,7 @@ public class UsersModelv2WrapperSQLTEST extends DBTableWrapperMaster {
     mItems = getItems();
     itemsForDelete.add((UsersModelv2) mItems.get(idx));//asv
     mItems.remove(idx);
-   // setItems(mItems); //asv this maybe will be save(), but is better if the save is only called from app
+    // setItems(mItems); //asv this maybe will be save(), but is better if the save is only called from app
   }
 
   @Override public void delItem(DBTableMaster item) {
@@ -104,9 +93,8 @@ public class UsersModelv2WrapperSQLTEST extends DBTableWrapperMaster {
         if (item.hashCode() == mItems.get(i).hashCode()) delIDX = i;
       }
       if (delIDX > -1) {
-        itemsForDelete.add((UsersModelv2) mItems.get(delIDX));//asv
+        itemsForDelete.add((UsersModelv2)mItems.get(delIDX));//asv-
         mItems.remove(delIDX);
-
         setItems(mItems);
       }
     }
@@ -119,7 +107,8 @@ public class UsersModelv2WrapperSQLTEST extends DBTableWrapperMaster {
       mItems = getItems();
       mItems.add((UsersModelv2) item);
 
-      itemsForInsert.add((UsersModelv2) item);//asv the next line execute a save by resetAll items, this way we need call save after call additem for persist data, maybe put save but no call setitems
+      itemsForInsert.add(
+          (UsersModelv2) item);//asv the next line execute a save by resetAll items, this way we need call save after call additem for persist data, maybe put save but no call setitems
       //setItems(mItems);
     }
   }
@@ -134,6 +123,7 @@ public class UsersModelv2WrapperSQLTEST extends DBTableWrapperMaster {
     }
     return idx;
   }
+
   @Override public Query<UsersModelv2> FROM() {
     Query<UsersModelv2> from = from(this.mItems);
     return from;
