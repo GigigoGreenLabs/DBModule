@@ -21,38 +21,34 @@ public abstract class DBEngineMaster {
     this.mContext = context;
   }
 
-  public abstract void createDB(DBScheme dbMasterScheme);
-
+  //region Db creation
   public abstract boolean isDBCreated(DBScheme dbMasterScheme);
 
-  public abstract void createDBTable(DBTableScheme table);
+  public abstract void createDB(DBScheme dbMasterScheme);
+  //endregion
+  //region table creation/clear
+  public abstract boolean isTableCreated(String tableName);
 
-  public abstract boolean isDBTableCreated(String tableName);
+  public abstract void createTable(DBTableScheme table);
 
-  public abstract void clearDBTable(String tableAlias);
-
-  public abstract DBTableScheme getDBTableSchema(String tableAlias);//esto devuelve los campos
-
+  public abstract void clearTable(String tableAlias);
+  //endregion
+  //region save/load table items
   public abstract void saveTable(DBTableWrapperMaster table, String tableAlias);
 
-  public abstract ArrayList<? extends DBTableMaster> loadItemsTable(
-      String tableAliasWithHashCodeOfField);
+  public abstract ArrayList<? extends DBTableMaster> loadItemsTable(String tableAliasWithHashCodeOfField);
+  //endregion
+  //region scheme
+  //table(fields/type)
+  public abstract void createTableScheme(DBTableScheme dbScheme);
 
-  @Deprecated
-  //asv el clearTable no se si se utiliza, ya q está dentro del propio wrapper de cada table, esto tal vez deberia ser un clearDB y q vacie la DB completa de registro
-  public abstract void clearTable(String tableAlias);/*elimina los registros xo no el fichero*/
-
+  public abstract DBTableScheme loadTableSchema(String tableAlias);//esto devuelve los campos de la tabla(nombre/tipo)
+  //database
   public abstract void createDBScheme(DBScheme dbScheme);
 
   public abstract DBScheme loadDBScheme();
-
-  public abstract void createDBTableScheme(DBTableScheme dbScheme);
-
-  public abstract void saveTableSchema(String tableAlias,
-      String HashCodeDBFields);//si no existe el fichero lo crea
-
-  public abstract DBTableScheme loadTableSchema(String tableAlias, String HashCodeDBFields);
-
+  //endregion
+  //region mappers
   ArrayList<DBMapperMaster> mapperMasters;
 
   public void setMigrationMappers(DBMapperMaster... mappers) {
@@ -66,6 +62,5 @@ public abstract class DBEngineMaster {
   public ArrayList<DBMapperMaster> getMigrationMappers() {
     return mapperMasters;
   }
-
-
+  //endregion
 }

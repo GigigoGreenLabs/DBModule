@@ -1,16 +1,13 @@
 package com.gigigo.aprocesor;
 
-import com.gigigo.aprocesor.annotations.DataBase;
 import com.gigigo.aprocesor.annotations.DataField;
 import com.gigigo.aprocesor.annotations.DataTable;
 import java.io.IOException;
 import java.io.Writer;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
@@ -88,7 +85,7 @@ import javax.tools.JavaFileObject;
     builderDataBaseMaster.append("public MyDB(DBEngineMaster mDBEngine) {\n"
         + "        super(mDBEngine);\n"
         + "        DBScheme dbScheme = new DBScheme();\n"
-        + "    dbScheme.setDbName(this.toString());\n "
+        + "    dbScheme.setDbName(this.getClass().toString());\n "
         + "     ArrayList<DBSchemeItem> lstDBSchemeItem = new ArrayList<>();\n"
         + "    if (!mDBEngine.isDBCreated(dbScheme)) {\n"
         + "      mDBEngine.createDB(dbScheme);\n"
@@ -115,7 +112,7 @@ import javax.tools.JavaFileObject;
     for (Element ele : lstTables4Hascode) {
       DataTable dataTableAnnotation = ele.getAnnotation(DataTable.class);
       String aliasTable = dataTableAnnotation.alias();
-      builderDataBaseMaster.append("\nif (!mDBEngine.isDBTableCreated(\""
+      builderDataBaseMaster.append("\nif (!mDBEngine.isTableCreated(\""
           + aliasTable
           + "\")) {\n"
           + "      ArrayList<DBTableFieldScheme> lstFields_"
@@ -136,8 +133,8 @@ import javax.tools.JavaFileObject;
           + "\", lstFields_"
           + aliasTable
           + ");");
-      builderDataBaseMaster.append("\nmDBEngine.createDBTableScheme(table" + aliasTable + ");");
-      builderDataBaseMaster.append("\nmDBEngine.createDBTable(table" + aliasTable + ");\n}");
+      builderDataBaseMaster.append("\nmDBEngine.createTableScheme(table" + aliasTable + ");");
+      builderDataBaseMaster.append("\nmDBEngine.createTable(table" + aliasTable + ");\n}");
     }
 
     builderDataBaseMaster.append("      }\n\n");
@@ -207,16 +204,21 @@ import javax.tools.JavaFileObject;
               + "  public void mySetItems(ArrayList<"
               + dataTableClassName
               + "> items) {\n"
+              + " itemsForDelete.addAll((ArrayList<"
+              + dataTableClassName
+              + ">) this.getItems());\n"
               + "    mItems = (ArrayList<"
               + dataTableClassName
               + ">) items;\n"
+              + "  itemsForInsert.addAll((ArrayList<"+ dataTableClassName+">) items); \n"
               + "    save();\n"
               + "  }\n"
               + "\n"
               + "  @Override public void delItem(int idx) {\n"
-              + "    mItems = getItems();\n"
+              + "    mItems = getItems();\n  "
+              + " itemsForDelete.add(("+ dataTableClassName+") mItems.get(idx)); \n"
               + "    mItems.remove(idx);\n"
-              + "    setItems(mItems);\n"
+              + "    //setItems(mItems);\n"
               + "  }\n"
               + "\n"
               + "  @Override public void delItem(DBTableMaster item) {\n"
@@ -230,8 +232,9 @@ import javax.tools.JavaFileObject;
               + "        if (item.hashCode() == mItems.get(i).hashCode()) delIDX = i;\n"
               + "      }\n"
               + "      if (delIDX > -1) {\n"
+              + "      itemsForDelete.add(("+ dataTableClassName+")mItems.get(delIDX));"
               + "        mItems.remove(delIDX);\n"
-              + "        setItems(mItems);\n"
+              + "       //setItems(mItems);\n"
               + "      }\n"
               + "    }\n"
               + "  }\n"
@@ -269,7 +272,8 @@ import javax.tools.JavaFileObject;
               + "      mItems.add(("
               + dataTableClassName
               + ") item);\n"
-              + "      setItems(mItems);\n"
+              + " itemsForInsert.add(("+dataTableClassName+") item);\n"
+              + "      //setItems(mItems);\n"
               + "    }\n"
               + "  }\n"
               + "\n"
@@ -287,7 +291,43 @@ import javax.tools.JavaFileObject;
               + "  @Override public String ModelClass() {return \""
               + dataTableClassName
               + "\";}"
-              + ""
+              + " @Override\n"
+              + "  public   <T extends DBTableMaster> T last(){\n"
+              + "    if(this.mItems!=null && this.mItems.size()>0 )\n"
+              + "      return (T)this.mItems.get(this.mItems.size()-1);\n"
+              + "    else\n"
+              + "      return null;\n"
+              + "  }\n"
+              + "  @Override\n"
+              + "  public   <T extends DBTableMaster> T first(){\n"
+              + "    if(this.mItems!=null && this.mItems.size()>0 )\n"
+              + "      return (T)this.mItems.get(1);\n"
+              + "    else\n"
+              + "      return null;\n"
+              + "\n"
+              + "  }\n"
+              + "  @Override\n"
+              + "  public   int size(){\n"
+              + "    if(this.mItems!=null && this.mItems.size()>0 )\n"
+              + "      return this.mItems.size();\n"
+              + "    else\n"
+              + "      return 0;\n"
+              + "  }\n"
+              + "  @Override\n"
+              + "  public   boolean hasItems()\n"
+              + "  {\n"
+              + "    if(this.mItems!=null && this.mItems.size()>0 )\n"
+              + "      return true;\n"
+              + "    else\n"
+              + "      return false;\n"
+              + "  }\n"
+              + "  @Override\n"
+              + "  public   boolean hasThisItem(int index){\n"
+              + "    if(this.mItems!=null && this.mItems.size()>index )\n"
+              + "      return true;\n"
+              + "    else\n"
+              + "      return false;\n"
+              + "  }"
               + ""
               + "}");
       //todo ver si una vez instanciado el wrapper no ir a buscarlo de nuevo a disco
@@ -310,7 +350,7 @@ import javax.tools.JavaFileObject;
           + dataTableClassName
           + ">) mDBEngine.loadItemsTable(\""
           + aliasTable
-          + "\"+"
+          + "\"+ \"|\" +"
           + aliasTable
           + "FieldsHashCode);\n"
           + "    m"
@@ -345,7 +385,7 @@ import javax.tools.JavaFileObject;
       }
     }
 
-    builderDataBaseMaster.append(MigrateDBMethodIni+MigrateDBMethodBody+"}\n\n }");
+    builderDataBaseMaster.append(MigrateDBMethodIni + MigrateDBMethodBody + "}\n\n }");
     //chamo falta terminar lo del for de myDB, y despues cerrar la clase y por ultimo escribir en el
     //file, falta tb mejorar la legibilidad des esto, lo primero una funcion de
     //escribir clase, pasamdo nombre y builder y crear regiones para encapsular las distintas areas

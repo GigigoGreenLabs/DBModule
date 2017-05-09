@@ -105,5 +105,25 @@ public class DBTableUsersWrapper extends DBTableWrapperMaster {
   @Override public String ModelClass() {
     return null;
   }
+
+  @Override public <T extends DBTableMaster> T last() {
+    return null;
+  }
+
+  @Override public <T extends DBTableMaster> T first() {
+    return null;
+  }
+
+  @Override public int size() {
+    return 0;
+  }
+
+  @Override public boolean hasItems() {
+    return false;
+  }
+
+  @Override public boolean hasThisItem(int index) {
+    return false;
+  }
   /**/
 }

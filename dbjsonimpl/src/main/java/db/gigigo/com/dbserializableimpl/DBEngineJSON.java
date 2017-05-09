@@ -30,18 +30,18 @@ public class DBEngineJSON extends DBEngineMaster {
     return  DataUtils.isFileExists(SCHEME_DB_FILE_NAME);
   }
 
-  @Override public boolean isDBTableCreated(String tableName) {
+  @Override public boolean isTableCreated(String tableName) {
     return DataUtils.isFileExists(tableName + SCHEME_TABLE_SUFFIX);
   }
 
-  @Override public void createDBTable(DBTableScheme table) {
+  @Override public void createTable(DBTableScheme table) {
     System.out.println("*****************create DB Table" + table.getLstTableFields().size());
     //json nothing to do
 
   }
 
-  @Override public void clearDBTable(String tableAlias) {
-    System.out.println("*****************clearDBTable" + tableAlias);
+  @Override public void clearTable(String tableAlias) {
+    System.out.println("*****************clearTable" + tableAlias);
     //this must be delete all items  DBTable  with the name alias, and all the hashcodeDBFields
     DBScheme dbScheme = DataUtils.readSerializable(this.mContext, SCHEME_DB_FILE_NAME);
     ArrayList<DBSchemeItem> newSchemaItems = new ArrayList<>();
@@ -152,15 +152,12 @@ public class DBEngineJSON extends DBEngineMaster {
     return arrayList;
   }
 
-  @Override public void clearTable(String tableAlias) {
-    System.out.println("*****************clearTable" + tableAlias);
-  }
   //region Schema fields Table
 
-  @Override public DBTableScheme getDBTableSchema(String tableAlias) {
-    System.out.println("*****************clearDBTable" + tableAlias);
+  @Override public DBTableScheme loadTableSchema(String tableAlias) {
+    System.out.println("*****************clearTable" + tableAlias);
     //this method maybe used by engines sql, or not need it because the creation will be
-    //by createDBTable, but maybe for create the inserts/update
+    //by createTable, but maybe for create the inserts/update
 
     String strFileName = tableAlias + SCHEME_TABLE_SUFFIX;
     DBTableScheme myTableScheme = DataUtils.readSerializable(this.mContext, strFileName);
@@ -181,8 +178,8 @@ public class DBEngineJSON extends DBEngineMaster {
 
    return DataUtils.readSerializable(this.mContext,  strFileName);
   }
-  @Override public void createDBTableScheme(DBTableScheme dbScheme) {
-    System.out.println("*****************  createDBTableScheme" + dbScheme.toString());
+  @Override public void createTableScheme(DBTableScheme dbScheme) {
+    System.out.println("*****************  createTableScheme" + dbScheme.toString());
     //esto crea un file llamado aliastable+Scheme.json que tiene la definicion de los campos que
     //esto guarda el file con el scheme y haría el createtable, si existiese deberia hacer droptable
     //create table con el array de campos q contiene el table
@@ -192,15 +189,6 @@ public class DBEngineJSON extends DBEngineMaster {
     //create table y tal
   }
 
-  /*ESTOS DOS METODOS DE MOMENTO NO SE UTILIZAN, el load no se si el esl get o q es*/
-  @Override public void saveTableSchema(String tableAlias, String HashCodeDBFields) {
-    System.out.println("*****************saveTableSchema" + tableAlias + HashCodeDBFields);
-  //  String strFileName = dbScheme.getTableAlias() + SCHEME_TABLE_SUFFIX;
-  }
 
-  @Override public DBTableScheme loadTableSchema(String tableAlias, String HashCodeDBFields) {
-    System.out.println("*****************loadTableSchema" + tableAlias + HashCodeDBFields);
-    return null;
-  }
   //endregion
 }

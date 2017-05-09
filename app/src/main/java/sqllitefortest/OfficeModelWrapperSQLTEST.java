@@ -1,6 +1,5 @@
 package sqllitefortest;
 
-import com.gigigo.dbmodule.generated.MyDB;
 import com.wagnerandade.coollection.query.Query;
 import db.gigigo.com.dbmaster.masterclass.DBEngineMaster;
 import db.gigigo.com.dbmaster.masterclass.DBTableMaster;
@@ -9,7 +8,6 @@ import db.gigigo.com.dbmodule.dbsample.OfficeModel;
 import java.util.ArrayList;
 
 import static com.wagnerandade.coollection.Coollection.from;
-import static sqllitefortest.SQLliteDB.OfisFieldsHashCode;
 
 public class OfficeModelWrapperSQLTEST extends DBTableWrapperMaster{
 
@@ -96,4 +94,25 @@ public class OfficeModelWrapperSQLTEST extends DBTableWrapperMaster{
  
 
  @Override public String HashCodeTableFields(){ return SQLliteDB.OfisFieldsHashCode ;}
-  @Override public String ModelClass() {return "OfficeModel";}}
+  @Override public String ModelClass() {return "OfficeModel";}
+
+  @Override public <T extends DBTableMaster> T last() {
+    return null;
+  }
+
+  @Override public <T extends DBTableMaster> T first() {
+    return null;
+  }
+
+  @Override public int size() {
+    return 0;
+  }
+
+  @Override public boolean hasItems() {
+    return false;
+  }
+
+  @Override public boolean hasThisItem(int index) {
+    return false;
+  }
+}

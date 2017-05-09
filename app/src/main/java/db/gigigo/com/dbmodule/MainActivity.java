@@ -5,28 +5,25 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
-import com.gigigo.dbsqliteimpl.DBEngineSQLLite;
+import com.gigigo.dbmodule.generated.MyDB;
 import com.gigigo.dbsqliteimpl.SqliteManager;
-import com.google.gson.Gson;
 import db.gigigo.com.dbmaster.masterclass.DBEngineMaster;
 import db.gigigo.com.dbmaster.masterclass.DBMapperMaster;
 import db.gigigo.com.dbmaster.masterclass.DBSaveLoadCallback;
-import db.gigigo.com.dbmaster.masterclass.DBTableMaster;
-import db.gigigo.com.dbmaster.schema.DBScheme;
 import db.gigigo.com.dbmodule.dbsample.DataGenerator;
 import db.gigigo.com.dbmodule.dbsample.NewTestModel;
 import db.gigigo.com.dbmodule.dbsample.UsersModel;
 import db.gigigo.com.dbmodule.dbsample.UsersModelv2;
+import db.gigigo.com.dbserializableimpl.DBEngineJSON;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
-import sqllitefortest.SQLliteDB;
 
 import static com.wagnerandade.coollection.Coollection.eq;
 
 public class MainActivity extends AppCompatActivity {
-  public static SQLliteDB mMyDataBase;//asv this maybe in the application
+  public static MyDB mMyDataBase;//asv this maybe in the application
   UsersModelv2 lastUsersModel;
   NewTestModel lastNewTestModel;
   Class className = null;
@@ -49,8 +46,8 @@ public class MainActivity extends AppCompatActivity {
         ArrayList<UsersModelv2> lst20 = new ArrayList<UsersModelv2>();
         for (int i = 0; i < 5; i++) {
 
-          lastUsersModel = new UsersModelv2(DataGenerator.getRandomName() + "SQL" + i,
-              DataGenerator.getRandomSurName() + "SQL" + i, System.currentTimeMillis() + "");
+          lastUsersModel = new UsersModelv2(DataGenerator.getRandomName() ,
+              DataGenerator.getRandomSurName() , System.currentTimeMillis() + "");
           lst20.add(lastUsersModel);
           mMyDataBase.Usuarios().addItem(lastUsersModel);
         }
@@ -63,8 +60,10 @@ public class MainActivity extends AppCompatActivity {
     Button btnDel = (Button) findViewById(R.id.btnDel);
     btnDel.setOnClickListener(new View.OnClickListener() {
       @Override public void onClick(View view) {
+
+        //fixme   esto no funciona, jaleo con modelObject
         if (lastUsersModel != null) {
-          System.out.println("class+aaa"+lastUsersModel.getClass());
+          System.out.println("class+aaa" + lastUsersModel.getClass());
           mMyDataBase.Usuarios().delItem(lastUsersModel);
           mMyDataBase.Usuarios().save();
         }
@@ -74,9 +73,13 @@ public class MainActivity extends AppCompatActivity {
     Button btnList = (Button) findViewById(R.id.btnList);
     btnList.setOnClickListener(new View.OnClickListener() {
       @Override public void onClick(View view) {
+
+        //region old pablo test
+        //fixme esto q es lo q es?? pruebas?
+        /*
         Gson gson = new Gson();
 
-        SqliteManager dbmanager = new SqliteManager(getApplicationContext(), "Usuarios");
+        SqliteManager dbmanager = new SqliteManager(getApplicationContext(), MyDB.class.toString());
         SQLiteDatabase db = dbmanager.getWritableDatabase();
 
         String jsonStrign = dbmanager.loadDatabaseAsJson("Usuarios", db);
@@ -97,29 +100,27 @@ public class MainActivity extends AppCompatActivity {
         DBScheme dbScheme = mMyDataBase.Usuarios().mDBEngine.loadDBScheme();
 
         for (int i = 0; i < dbScheme.getLstSchemaItems().size(); i++) {
-          /*
-          System.out.println("Model Class" + dbScheme.getLstSchemaItems().get(i).getModelClass());
-          */
+
           if (tableAlias.equals(dbScheme.getLstSchemaItems().get(i).getTableAlias())) {
-            /*System.out.println(
-                "FIESTA DE LA KREBADA MODEL ENCONTRADO" + dbScheme.getLstSchemaItems().get(i).getModelClass());*/
+            //System.out.println(
+                "FIESTA DE LA KREBADA MODEL ENCONTRADO" + dbScheme.getLstSchemaItems().get(i).getModelClass());
             try {
-              className =Class.forName("db.gigigo.com.dbmodule.dbsample."+dbScheme.getLstSchemaItems().get(i).getModelClass());
+              className = Class.forName(
+                  "db.gigigo.com.dbmodule.dbsample." + dbScheme.getLstSchemaItems()
+                      .get(i)
+                      .getModelClass());
             } catch (ClassNotFoundException e) {
               e.printStackTrace();
             }
           }
-        }
+        }*/
+        //endregion
 
    /*     //A
         Type listType = new TypeToken<ArrayList<UsersModelv2>>() {
         }.getType();
         List<UsersModelv2> list = new Gson().fromJson(jsonStrign, listType);
 */
-
-
-
-
 
         //B
  /*       Type listType2 = new TypeToken<ArrayList<UsersModelv2>>() {
@@ -130,9 +131,8 @@ public class MainActivity extends AppCompatActivity {
           System.out.println("--------------"+dbTableMaster);
         }*/
 
-
-
-        //C
+        //fixme only with SQLimpl
+        /*
         Type  type = new ListParametizedType(className);
         List<? extends DBTableMaster> list  = gson.fromJson(jsonStrign, type);
 
@@ -142,6 +142,12 @@ public class MainActivity extends AppCompatActivity {
         System.out.println("NºUsuarios: "+list.size());
 
 
+        //asv only with SQLimpl
+        List<UsersModelv2> listUsers  = gson.fromJson(jsonStrign, type);
+        for (UsersModelv2 item : listUsers) {
+          System.out.println(item.getName()+ " "+ item.getSurname());
+        }
+*/
 
         /*
           File file = dbmanager.loadDatabaseAsXml("Usuarios",db);
@@ -164,8 +170,10 @@ public class MainActivity extends AppCompatActivity {
         }*/
 
         //OLD USERMODEL JSON-VALID
+        //fixme esto debe funcionar tb para SQLlite
 
-     /*   for (UsersModelv2 item : mMyDataBase.Usuarios().getItems()) {
+     /* */
+        for (UsersModelv2 item : mMyDataBase.Usuarios().getItems()) {
           System.out.println("Name: "
               + item.getName()
               + " SurName: "
@@ -174,9 +182,7 @@ public class MainActivity extends AppCompatActivity {
               + item.hashCode());
         }
 
-        System.out.println("TOTAL: " + mMyDataBase.Usuarios().getItemsModelObj().size());
-        */
-
+        System.out.println("TOTAL: " + mMyDataBase.Usuarios().getItems().size());
       }
     });
 
@@ -283,7 +289,7 @@ public class MainActivity extends AppCompatActivity {
   }
 
   private void initDB() {
-    DBEngineMaster bdEngine = new DBEngineSQLLite(this); //new DBEngineJSON(this);
+    DBEngineMaster bdEngine = new DBEngineJSON(this);//new DBEngineSQLLite(this);
     DBMapperMaster myMapper = new DBMapperMaster("UsersModel", "UsersModelv2") {
       @Override public <I, O> O convert(I input) {
         UsersModel u1 = (UsersModel) input;
@@ -294,11 +300,11 @@ public class MainActivity extends AppCompatActivity {
     };
 
     bdEngine.setMigrationMappers(myMapper);
-    mMyDataBase = new SQLliteDB(bdEngine);
-    //mMyDataBase.migrateDB(); //FOR EXECUTE MIGRATION
+    mMyDataBase = new MyDB(bdEngine);
+    //mMyDataBase.migrateDB(); //FOR EXECUTE MIGRATION, only json
   }
 
-  private static class ListParametizedType implements ParameterizedType{
+  private static class ListParametizedType implements ParameterizedType {
 
     private Type type;
 
@@ -307,7 +313,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override public Type[] getActualTypeArguments() {
-      return new Type[]{type};
+      return new Type[] { type };
     }
 
     @Override public Type getRawType() {

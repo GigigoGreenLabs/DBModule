@@ -50,30 +50,30 @@ public class SQLliteDB extends DBMaster {
         System.currentTimeMillis()));
     dbScheme.setLstSchemaItems(lstDBSchemeItem);
     mDBEngine.createDBScheme(dbScheme);
-    if (!mDBEngine.isDBTableCreated("Testeo")) {
+    if (!mDBEngine.isTableCreated("Testeo")) {
       ArrayList<DBTableFieldScheme> lstFields_Testeo = new ArrayList<>();
       lstFields_Testeo.add(new DBTableFieldScheme("java.lang.String", "Title"));
       lstFields_Testeo.add(new DBTableFieldScheme("java.lang.String", "Nombre"));
       lstFields_Testeo.add(new DBTableFieldScheme("java.lang.Integer", "Age"));
       DBTableScheme tableTesteo = new DBTableScheme("Testeo", lstFields_Testeo);
-      mDBEngine.createDBTableScheme(tableTesteo);
-      mDBEngine.createDBTable(tableTesteo);
+      mDBEngine.createTableScheme(tableTesteo);
+      mDBEngine.createTable(tableTesteo);
     }
-    if (!mDBEngine.isDBTableCreated("Ofis")) {
+    if (!mDBEngine.isTableCreated("Ofis")) {
       ArrayList<DBTableFieldScheme> lstFields_Ofis = new ArrayList<>();
       lstFields_Ofis.add(new DBTableFieldScheme("java.lang.String", "Nombre"));
       DBTableScheme tableOfis = new DBTableScheme("Ofis", lstFields_Ofis);
-      mDBEngine.createDBTableScheme(tableOfis);
-      mDBEngine.createDBTable(tableOfis);
+      mDBEngine.createTableScheme(tableOfis);
+      mDBEngine.createTable(tableOfis);
     }
-    if (!mDBEngine.isDBTableCreated("Usuarios")) {
+    if (!mDBEngine.isTableCreated("Usuarios")) {
       ArrayList<DBTableFieldScheme> lstFields_Usuarios = new ArrayList<>();
       lstFields_Usuarios.add(new DBTableFieldScheme("java.lang.String", "Name"));
       lstFields_Usuarios.add(new DBTableFieldScheme("java.lang.String", "Surname"));
       lstFields_Usuarios.add(new DBTableFieldScheme("java.lang.Integer", "Age"));
       DBTableScheme tableUsuarios = new DBTableScheme("Usuarios", lstFields_Usuarios);
-      mDBEngine.createDBTableScheme(tableUsuarios);
-      mDBEngine.createDBTable(tableUsuarios);
+      mDBEngine.createTableScheme(tableUsuarios);
+      mDBEngine.createTable(tableUsuarios);
     }
   }
 

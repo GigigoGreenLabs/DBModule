@@ -56,7 +56,7 @@ public abstract class DBTableWrapperMaster {
 
   public void save() {
     if (this.mDBSaveLoadCallback != null) this.mDBSaveLoadCallback.preSave();
-    mDBEngine.saveTable(this, mAlias + HashCodeTableFields());
+    mDBEngine.saveTable(this, mAlias + "|" +HashCodeTableFields());
     if (this.mDBSaveLoadCallback != null) this.mDBSaveLoadCallback.postSave();
     resetItemsFor();
   }
@@ -64,7 +64,7 @@ public abstract class DBTableWrapperMaster {
   public ArrayList<? extends DBTableMaster> load() {
     if (this.mDBSaveLoadCallback != null) this.mDBSaveLoadCallback.preLoad();
     ArrayList<? extends DBTableMaster> arrayList =
-        mDBEngine.loadItemsTable(mAlias + HashCodeTableFields());
+        mDBEngine.loadItemsTable(mAlias + "|" + HashCodeTableFields());
     if (this.mDBSaveLoadCallback != null) this.mDBSaveLoadCallback.postLoad();
     resetItemsFor();
     return arrayList;
@@ -73,4 +73,11 @@ public abstract class DBTableWrapperMaster {
   /*NEWW*/
   public abstract String HashCodeTableFields();
   public abstract String ModelClass ();
+  /*NEW NEW*/
+  public abstract <T extends DBTableMaster> T last();
+  public abstract <T extends DBTableMaster> T first();
+  public abstract int size();
+  public abstract boolean hasItems();
+  public abstract boolean hasThisItem(int index);
+
 }

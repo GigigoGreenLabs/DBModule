@@ -73,6 +73,7 @@ public class SqliteManager extends SQLiteOpenHelper {
     }
   }
 
+  //fixme hay q eliminar todo rastro de modelobject
   public LinkedHashMap<Integer, ModelObj> loadObjectList(SQLiteDatabase db, String tableName) {
 
     LinkedHashMap<Integer, ModelObj> rowUser = new LinkedHashMap<>();

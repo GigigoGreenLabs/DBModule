@@ -95,7 +95,7 @@ public class UsersModelv2WrapperSQLTEST extends DBTableWrapperMaster {
       if (delIDX > -1) {
         itemsForDelete.add((UsersModelv2)mItems.get(delIDX));//asv-
         mItems.remove(delIDX);
-        setItems(mItems);
+        //setItems(mItems);
       }
     }
   }
@@ -135,5 +135,25 @@ public class UsersModelv2WrapperSQLTEST extends DBTableWrapperMaster {
 
   @Override public String ModelClass() {
     return "UsersModelv2";
+  }
+
+  @Override public <T extends DBTableMaster> T last() {
+    return null;
+  }
+
+  @Override public <T extends DBTableMaster> T first() {
+    return null;
+  }
+
+  @Override public int size() {
+    return 0;
+  }
+
+  @Override public boolean hasItems() {
+    return false;
+  }
+
+  @Override public boolean hasThisItem(int index) {
+    return false;
   }
 }
