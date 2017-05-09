@@ -12,6 +12,10 @@ import static com.wagnerandade.coollection.Coollection.from;
 /**
  * Created by nubor on 06/03/2017.
  */ /* apt generation*/
+
+
+ //fixme esta clase sobra, está por tests
+ @Deprecated
 public class DBTableUsersWrapper extends DBTableWrapperMaster {
   public DBTableUsersWrapper(UsersModel table, DBEngineMaster engineMaster, String alias) {
     super(table, engineMaster, alias);

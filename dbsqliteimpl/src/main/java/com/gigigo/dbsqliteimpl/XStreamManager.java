@@ -7,6 +7,8 @@ package com.gigigo.dbsqliteimpl;
 
 
 /** Very simple model. */
+//fixme sobra?
+@Deprecated
 public  class XStreamManager {
 
   public XStreamManager(String str) {

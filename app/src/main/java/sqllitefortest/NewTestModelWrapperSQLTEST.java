@@ -10,6 +10,8 @@ import java.util.ArrayList;
 
 import static com.wagnerandade.coollection.Coollection.from;
 
+//fixme sobra
+@Deprecated
 public class NewTestModelWrapperSQLTEST extends DBTableWrapperMaster{
 
 	 public NewTestModelWrapperSQLTEST(NewTestModel table, DBEngineMaster engineMaster, String alias){

@@ -3,7 +3,8 @@ package com.gigigo.dbsqliteimpl;
 import db.gigigo.com.dbmaster.masterclass.DBTableMaster;
 import java.util.ArrayList;
 import java.util.List;
-
+//fixme sobra
+@Deprecated
 public class ModelObj extends DBTableMaster {
 
   private List<String> list;

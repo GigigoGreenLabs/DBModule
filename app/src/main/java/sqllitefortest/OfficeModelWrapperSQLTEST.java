@@ -8,7 +8,8 @@ import db.gigigo.com.dbmodule.dbsample.OfficeModel;
 import java.util.ArrayList;
 
 import static com.wagnerandade.coollection.Coollection.from;
-
+//fixme sobra
+@Deprecated
 public class OfficeModelWrapperSQLTEST extends DBTableWrapperMaster{
 
 	 public OfficeModelWrapperSQLTEST(OfficeModel table, DBEngineMaster engineMaster, String alias){

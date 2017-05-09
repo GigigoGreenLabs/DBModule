@@ -20,7 +20,8 @@ import db.gigigo.com.dbmaster.schema.DBSchemeItem;
 import db.gigigo.com.dbmaster.schema.DBTableFieldScheme;
 
 import db.gigigo.com.dbmaster.schema.DBTableScheme;
-
+//fixme sobra
+@Deprecated
 public class SQLliteDB extends DBMaster {
 
   public static final String TesteoFieldsHashCode = "1710625327";

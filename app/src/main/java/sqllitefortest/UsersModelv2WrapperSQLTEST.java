@@ -9,7 +9,8 @@ import db.gigigo.com.dbmodule.dbsample.UsersModelv2;
 import java.util.ArrayList;
 
 import static com.wagnerandade.coollection.Coollection.from;
-
+//fixme sobra
+@Deprecated
 public class UsersModelv2WrapperSQLTEST extends DBTableWrapperMaster {
 
   public UsersModelv2WrapperSQLTEST(UsersModelv2 table, DBEngineMaster engineMaster, String alias) {

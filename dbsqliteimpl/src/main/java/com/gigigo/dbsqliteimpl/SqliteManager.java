@@ -24,6 +24,8 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+
+//fixme avoid modelobject
 public class SqliteManager extends SQLiteOpenHelper {
 
   private static int version = 1;
