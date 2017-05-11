@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import com.gigigo.dbmodule.generated.MyDB;
+import com.gigigo.dbsqliteimpl.DBEngineSQLLite;
 import com.gigigo.dbsqliteimpl.SqliteManager;
 import db.gigigo.com.dbmaster.masterclass.DBEngineMaster;
 import db.gigigo.com.dbmaster.masterclass.DBMapperMaster;
@@ -14,7 +15,6 @@ import db.gigigo.com.dbmodule.dbsample.DataGenerator;
 import db.gigigo.com.dbmodule.dbsample.NewTestModel;
 import db.gigigo.com.dbmodule.dbsample.UsersModel;
 import db.gigigo.com.dbmodule.dbsample.UsersModelv2;
-import db.gigigo.com.dbserializableimpl.DBEngineJSON;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -219,6 +219,7 @@ public class MainActivity extends AppCompatActivity {
           int idxForUpdate = mMyDataBase.Usuarios().findIndex(user4Set);
           user4Set.setName("Papote");
           mMyDataBase.Usuarios().setItem(user4Set, idxForUpdate);
+          mMyDataBase.Usuarios().save();
 
           for (UsersModelv2 item : all) {
             System.out.println("Name: "
@@ -289,7 +290,7 @@ public class MainActivity extends AppCompatActivity {
   }
 
   private void initDB() {
-    DBEngineMaster bdEngine = new DBEngineJSON(this);//new DBEngineSQLLite(this);
+    DBEngineMaster bdEngine = new DBEngineSQLLite(this);//new DBEngineJSON(this);
     DBMapperMaster myMapper = new DBMapperMaster("UsersModel", "UsersModelv2") {
       @Override public <I, O> O convert(I input) {
         UsersModel u1 = (UsersModel) input;

@@ -91,8 +91,8 @@ public class NewTestModelWrapperSQLTEST extends DBTableWrapperMaster{
   }
 
   @Override public Query<NewTestModel> FROM() {
-    Query<NewTestModel> from = from(this.mItems);
-    return from;
+  //  Query<NewTestModel> from = from(this.mItems);
+    return null;
   } 
  
 

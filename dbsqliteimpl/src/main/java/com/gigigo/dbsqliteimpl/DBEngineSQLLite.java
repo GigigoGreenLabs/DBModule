@@ -67,14 +67,18 @@ public class DBEngineSQLLite extends DBEngineMaster {
 
   @Override public boolean isDBCreated(DBScheme dbMasterScheme) {
     Log.v("DATABASENAME", "" + dbMasterScheme.getDbName());
-    mSqliteManager = new SqliteManager(mContext, dbMasterScheme.getDbName());
-    sqLiteDatabase = mSqliteManager.getWritableDatabase();
 
-    return mSqliteManager.checkIfDatabaseExists(this.mContext, dbMasterScheme.getDbName());
+    if (mSqliteManager.checkIfDatabaseExists(this.mContext, dbMasterScheme.getDbName())){
+      mSqliteManager = new SqliteManager(mContext, dbMasterScheme.getDbName());
+      sqLiteDatabase = mSqliteManager.getWritableDatabase();
+      return true;
+    }else{
+      return false;
+    }
   }
 
   private String normalizetableName(String tableName) {
-   // return tableName.replace("-", "");
+
     if(tableName.indexOf("|")>-1)
     return tableName.substring(0, tableName.indexOf("|"));
     else
