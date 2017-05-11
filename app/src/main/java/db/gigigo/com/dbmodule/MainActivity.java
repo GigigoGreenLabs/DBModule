@@ -245,9 +245,9 @@ public class MainActivity extends AppCompatActivity {
   }
 
   private void createSampleDB() {
-    SqliteManager sql = new SqliteManager(getApplicationContext(), "Usuarios");
+    SqliteManager sql = new SqliteManager(getApplicationContext(), "class com.gigigo.dbmodule.generated.MyDB");
     SQLiteDatabase db = sql.getWritableDatabase();
-    String sqlCreate = "CREATE TABLE Usuarios (codigo INTEGER, nombre TEXT)";
+    String sqlCreate = "CREATE TABLE testaaa (codigo INTEGER, nombre TEXT)";
     db.execSQL(sqlCreate);
 
     if (db != null) {
@@ -258,7 +258,7 @@ public class MainActivity extends AppCompatActivity {
         String nombre = "DBModule" + i;
 
         db.execSQL(
-            "INSERT INTO Usuarios (codigo, nombre) " + "VALUES (" + codigo + ", '" + nombre + "')");
+            "INSERT INTO testaaa (codigo, nombre) " + "VALUES (" + codigo + ", '" + nombre + "')");
       }
 
       db.close();

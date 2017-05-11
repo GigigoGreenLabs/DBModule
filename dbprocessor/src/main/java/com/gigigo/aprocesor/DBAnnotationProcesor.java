@@ -188,7 +188,7 @@ import javax.tools.JavaFileObject;
               + "  }\n"
               + "\n"
               + "  @Override public void setItems(ArrayList<? extends DBTableMaster> items) {\n"
-              + "    if (!items.isEmpty() && items.get(0) instanceof "
+              + "    if (items!=null && !items.isEmpty() && items.get(0) instanceof "
               + dataTableClassName
               + ") {\n"
               + "      mySetItems((ArrayList<"

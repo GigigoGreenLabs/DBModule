@@ -24,6 +24,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import static android.view.View.X;
 
 //fixme avoid modelobject
 public class SqliteManager extends SQLiteOpenHelper {
@@ -120,6 +121,12 @@ public class SqliteManager extends SQLiteOpenHelper {
     } catch (IOException e) {
       e.printStackTrace();
     }
+    String[] dataName = databaseName.split(" ");
+    if (dataName.length > 1){
+      databaseName = dataName[1];
+    }
+
+    Log.v("DATANAME",""+ databaseName);
     xmlBuilder.start(databaseName);
 
     // get the tables
@@ -130,7 +137,6 @@ public class SqliteManager extends SQLiteOpenHelper {
 
       //while (c.moveToNext()) {
      // String tableName ="dept";//c.getString(c.getColumnIndex("dep_id"));
-
       // skip metadata, sequence, and uidx (unique indexes)
       if (!tableName.equals("android_metadata") && !tableName.equals("sqlite_sequence")
           && !tableName.startsWith("uidx")) {
@@ -206,6 +212,7 @@ public class SqliteManager extends SQLiteOpenHelper {
     if (c.moveToFirst()) {
       int cols = c.getColumnCount();
       do {
+        xmlBuilder.addItem();
         for (int i = 0; i < cols; i++) {
                 /*if(i==6)
                 {
@@ -213,8 +220,10 @@ public class SqliteManager extends SQLiteOpenHelper {
                     String str = new String(image);
                     xmlBuilder.addColumn(c.getColumnName(i), str);
                 }*/
+
           xmlBuilder.addColumn(c.getColumnName(i), c.getString(i));
         }
+        xmlBuilder.closeItem();
       } while (c.moveToNext());
     }
     c.close();
@@ -292,27 +301,35 @@ public class SqliteManager extends SQLiteOpenHelper {
     void start(final String dbName) {
       sb.append(XmlBuilder.OPEN_XML_STANZA);
       sb.append(
-          XmlBuilder.OPEN_WITH_TICK+ dbName + XmlBuilder.CLOSE_WITH_TICK);
+          XmlBuilder.OPEN_WITH_TICK+ "database" + XmlBuilder.CLOSE_WITH_TICK+ XmlBuilder.OPEN_WITH_TICK+ "dataname" + XmlBuilder.CLOSE_WITH_TICK + dbName + XmlBuilder.OPEN_WITH_CLOSED_TICK+ "dataname" + XmlBuilder.CLOSE_WITH_TICK);
     }
 
-    String end(String databaseName) throws IOException {
-      sb.append(XmlBuilder.OPEN_WITH_CLOSED_TICK + "DATABASE" + XmlBuilder.CLOSE_WITH_TICK);
+    String end(String dbName) throws IOException {
+      sb.append(XmlBuilder.OPEN_WITH_CLOSED_TICK + "database" + XmlBuilder.CLOSE_WITH_TICK);
       return sb.toString();
     }
 
     void openTable(final String tableName) {
       sb.append(
-          XmlBuilder.OPEN_WITH_TICK + tableName + XmlBuilder.CLOSE_WITH_TICK);
+          XmlBuilder.OPEN_WITH_TICK + "table" + XmlBuilder.CLOSE_WITH_TICK+ XmlBuilder.OPEN_WITH_TICK+ "tablename" + XmlBuilder.CLOSE_WITH_TICK + tableName + XmlBuilder.OPEN_WITH_CLOSED_TICK+ "tablename" + XmlBuilder.CLOSE_WITH_TICK);
     }
 
     void closeTable(String tableName) {
-      sb.append(XmlBuilder.OPEN_WITH_CLOSED_TICK + tableName + XmlBuilder.CLOSE_WITH_TICK);
+      sb.append(XmlBuilder.OPEN_WITH_CLOSED_TICK + "table" + XmlBuilder.CLOSE_WITH_TICK);
     }
 
     void addColumn(final String name, final String val) throws IOException {
-      sb.append(XmlBuilder.OPEN_WITH_CLOSED_TICK + val + XmlBuilder.CLOSE_WITH_TICK);
+      sb.append(XmlBuilder.OPEN_WITH_TICK + name + XmlBuilder.CLOSE_WITH_TICK+ val+ XmlBuilder.OPEN_WITH_CLOSED_TICK+ name + XmlBuilder.CLOSE_WITH_TICK);
     }
 
+    public void addItem() {
+      sb.append(XmlBuilder.OPEN_WITH_TICK + "row" + XmlBuilder.CLOSE_WITH_TICK);
+    }
+
+
+    public void closeItem() {
+      sb.append(XmlBuilder.OPEN_WITH_CLOSED_TICK + "row" + XmlBuilder.CLOSE_WITH_TICK);
+    }
   }
 
   public <T extends Serializable> T loadObjectListDBTableMaster(SQLiteDatabase db, String tableName) {
@@ -320,6 +337,8 @@ public class SqliteManager extends SQLiteOpenHelper {
     String[] parts = tableName.split("-");
     tableName = parts[0];
     T objectToReturn = null;
+
+    //ArrayList<? extends DBTableMaster> object4Return  = new ArrayList<>();
 
     ArrayList<ModelObj> rowUser = new ArrayList<>();
     int id = 1;
@@ -353,6 +372,8 @@ public class SqliteManager extends SQLiteOpenHelper {
     }
 
     objectToReturn = (T) rowUser;
+
+    //object4Return = rowUser;
     return objectToReturn;
   }
 

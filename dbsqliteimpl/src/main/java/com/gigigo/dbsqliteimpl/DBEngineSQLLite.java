@@ -5,6 +5,11 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+import com.google.gson.annotations.SerializedName;
 import db.gigigo.com.dbmaster.masterclass.DBEngineMaster;
 import db.gigigo.com.dbmaster.masterclass.DBTableMaster;
 import db.gigigo.com.dbmaster.masterclass.DBTableWrapperMaster;
@@ -13,8 +18,14 @@ import db.gigigo.com.dbmaster.schema.DBSchemeItem;
 import db.gigigo.com.dbmaster.schema.DBTableFieldScheme;
 import db.gigigo.com.dbmaster.schema.DBTableScheme;
 import java.io.File;
+import java.io.Reader;
+import java.io.Serializable;
+import java.io.StringReader;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.XML;
 
 /**
  * Created by nubor on 03/03/2017.se
@@ -513,29 +524,62 @@ public class DBEngineSQLLite extends DBEngineMaster {
     tableAlias = normalizetableName(tableAlias);
     final File file1 = mSqliteManager.loadDatabaseAsXml(tableAlias, sqLiteDatabase);
     String xmlStrign = mSqliteManager.readFromFile(file1);
-
-   /* // todo serializar xml
+    ArrayList<? extends DBTableMaster> arrayList = new ArrayList<>();
+    // todo serializar xml
     try {
       JSONObject jsonObject = XML.toJSONObject(xmlStrign);
 
       JSONObject arrayUsers = jsonObject;//jsonObject.getJSONObject("col");
-
+      String jsonPrettyPrintString = jsonObject.toString();
+      System.out.println(jsonPrettyPrintString);
       Reader reader = new StringReader(arrayUsers.toString());
       JsonElement elem = new JsonParser().parse(reader);
       Gson gson = new GsonBuilder().create();
-      Object o = gson.fromJson(elem, Object.class);
-      ArrayList<? extends DBTableMaster> arrayListTest = (ArrayList<? extends DBTableMaster>) o;
-      System.out.println("ooooooooo" + o);
-      String jsonPrettyPrintString = jsonObject.toString();
-      System.out.println(jsonPrettyPrintString);
+
+     // data d = gson.fromJson(jsonObject.toString(), data.class);
+
+    /*  data database = new data();
+
+      String databaseName = String.valueOf(jsonObject.getJSONObject("database").get("dataname"));
+      String tableName = String.valueOf(jsonObject.getJSONObject("database").getJSONObject("table").get("tablename"));*/
+
+      ArrayList<UsersModelproxy> arrayListUsersModelproxy = new ArrayList<>();
+
+      arrayListUsersModelproxy = gson.fromJson(
+          String.valueOf(jsonObject.getJSONObject("database").getJSONObject("table").getJSONArray("row")),arrayListUsersModelproxy.getClass());
+
+
+
+      UsersModelproxy[] ususarios = new UsersModelproxy[]{};
+
+
+
+      arrayList = gson.fromJson(
+          String.valueOf(jsonObject.getJSONObject("database").getJSONObject("table").getJSONArray("row")),arrayList.getClass());
+
+      Object[] objAux = new Object[]{};
+
+      objAux = gson.fromJson(
+          String.valueOf(jsonObject.getJSONObject("database").getJSONObject("table").getJSONArray("row")),objAux.getClass());
+
+
+ ususarios = gson.fromJson(
+    String.valueOf(jsonObject.getJSONObject("database").getJSONObject("table").getJSONArray("row")),ususarios.getClass());
+
+
+
     } catch (JSONException je) {
       System.out.println(je.toString());
-    }*/
+    }
 
+    return  arrayList;
+
+    /*
     ArrayList<? extends DBTableMaster> arrayList =
         mSqliteManager.loadObjectListDBTableMaster(sqLiteDatabase, tableAlias);
     if (arrayList == null) arrayList = new ArrayList<>();
     return arrayList;
+    */
 
     //mSqliteManager.readFromFile(file);
 
@@ -552,4 +596,41 @@ public class DBEngineSQLLite extends DBEngineMaster {
   }
 
   //endregion
+}
+
+
+
+class data implements Serializable{
+  @SerializedName("dataname")
+  private String dataname;
+
+  @SerializedName("tablename")
+  private String tablename;
+
+  @SerializedName("row")
+  private ArrayList <Object> row;
+
+  public String getDataname() {
+    return dataname;
+  }
+
+  public void setDataname(String dataname) {
+    this.dataname = dataname;
+  }
+
+  public String getTablename() {
+    return tablename;
+  }
+
+  public void setTablename(String tablename) {
+    this.tablename = tablename;
+  }
+
+  public ArrayList<Object> getRow() {
+    return row;
+  }
+
+  public void setRow(ArrayList<Object> row) {
+    this.row = row;
+  }
 }
