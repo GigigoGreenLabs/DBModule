@@ -2,11 +2,14 @@ package com.gigigo.gigigocrud_sqliteandroid;
 
 import android.content.Context;
 import android.content.Intent;
+import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
+import com.gigigo.gigigocrud_sqliteandroid.Objects.Bind;
+import com.gigigo.gigigocrud_sqliteandroid.databinding.ActivityAdminSqlMainBinding;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -14,7 +17,13 @@ public class MainActivity extends AppCompatActivity {
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_admin_sql_main);
+   // setContentView(R.layout.activity_admin_sql_main);
+
+
+    ActivityAdminSqlMainBinding bind = DataBindingUtil.setContentView(this,R.layout.activity_admin_sql_main);
+
+    Bind obj = new Bind("Database");
+    bind.setDatabaseActivity(obj);
 
 
     btnManager = (Button) findViewById(R.id.btnEnterSample);

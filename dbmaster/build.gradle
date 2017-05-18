@@ -16,6 +16,9 @@ android {
       proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
     }
   }
+  dataBinding {
+    enabled = true
+  }
 
   //duplicate if we add project dbannotattion to dependencies
     packagingOptions {
@@ -41,10 +44,7 @@ preBuild.dependsOn(copyTask)
 * 2.-processorTask will copy this jar file to the android app/libs/ folder
 * 3.-The :app module will now reference the new jar.
 * */
-
-  import org.gradle.internal.os.OperatingSystem;
-
-  //asv keep that for rememnber the rigth way, and the OperatingSystem if is nice for use that
+//asv keep that for rememnber the rigth way, and the OperatingSystem if is nice for use that
 //por una tarea de copia de files p`ropia de gradle
   /*annotation processor
   task processorTask(type: Exec) {

@@ -145,7 +145,7 @@ public class MainActivity extends AppCompatActivity {
         //asv only with SQLimpl
         List<UsersModelv2> listUsers  = gson.fromJson(jsonStrign, type);
         for (UsersModelv2 item : listUsers) {
-          System.out.println(item.getName()+ " "+ item.getSurname());
+          System.out.println(item.getDatabaseTitle()+ " "+ item.getSurname());
         }
 */
 
@@ -210,7 +210,7 @@ public class MainActivity extends AppCompatActivity {
 
         List<UsersModelv2> all = mMyDataBase.Usuarios()
             .FROM()
-            .where("getName", eq("Alberto"))
+            .where("getDatabaseTitle", eq("Alberto"))
             .and("SurName", eq("Sainz"))
             .orderBy("getSurname")
             .all();

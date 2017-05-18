@@ -1,8 +1,10 @@
 apply plugin: 'com.android.library'
 
+
 android {
   compileSdkVersion 25
   buildToolsVersion "25.0.2"
+
   defaultConfig {
 
     minSdkVersion 10
@@ -19,7 +21,9 @@ android {
       proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
     }
   }
-
+  dataBinding {
+    enabled = true
+  }
 }
 
 dependencies {
