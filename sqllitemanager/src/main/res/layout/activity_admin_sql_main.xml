@@ -3,6 +3,7 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android">
   <data>
     <variable name="databaseActivity" type="com.gigigo.gigigocrud_sqliteandroid.Objects.Bind"/>
+    <variable name="main" type="com.gigigo.gigigocrud_sqliteandroid.MainActivity"/>
   </data>
 
 <LinearLayout
@@ -44,8 +45,10 @@
         android:textColor="@android:color/white"
         android:background="@color/colorPrimary"
         android:text="Enter"
+        android:onClick="@{main::onClickButton}"
         android:id="@+id/btnEnterSample"
         />
+
   </LinearLayout>
 
   </LinearLayout>

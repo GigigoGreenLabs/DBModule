@@ -4,16 +4,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
-
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-import android.widget.Button;
 import com.gigigo.gigigocrud_sqliteandroid.Objects.Bind;
 import com.gigigo.gigigocrud_sqliteandroid.databinding.ActivityAdminSqlMainBinding;
 
 public class MainActivity extends AppCompatActivity {
 
-  private Button btnManager;
+  //private Button btnManager;
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -24,16 +22,23 @@ public class MainActivity extends AppCompatActivity {
 
     Bind obj = new Bind("Database");
     bind.setDatabaseActivity(obj);
+    bind.setMain(this);
 
 
-    btnManager = (Button) findViewById(R.id.btnEnterSample);
+    //btnManager = (Button) findViewById(R.id.btnEnterSample);
 
-    btnManager.setOnClickListener(new View.OnClickListener() {
+ /*   btnManager.setOnClickListener(new View.OnClickListener() {
       @Override public void onClick(View v) {
         Intent intent = new Intent(MainActivity.this,DatabaseActivity.class);
         startActivity(intent);
       }
-    });
+    });*/
+
+  }
+
+  public void onClickButton(View v){
+    Intent intent = new Intent(MainActivity.this,DatabaseActivity.class);
+    startActivity(intent);
   }
 
   public static void open(Context context){
